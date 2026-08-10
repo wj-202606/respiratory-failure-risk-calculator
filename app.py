@@ -52,7 +52,7 @@ with col1:
     )
     
     aptt = st.number_input(
-        "Activated partial thromboplastin time APTT (秒)",
+        "Activated partial thromboplastin time APTT (s)",
         min_value=10.0, max_value=150.0, value=35.0, step=0.5,
         help="normal range: 25-35秒"
     )
