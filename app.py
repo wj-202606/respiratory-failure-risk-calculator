@@ -42,37 +42,37 @@ with col1:
     alb = st.number_input(
         "Albumin ALB (g/L)",
         min_value=5.0, max_value=60.0, value=35.0, step=0.5,
-        help="normal range: 35-55 g/L"
+        help="normal range: 40-55 g/L"
     )
     
     dd = st.number_input(
         "D-dimer DD (mg/L)",
         min_value=0.0, max_value=100.0, value=1.0, step=0.1,
-        help="normal range: < 0.5 mg/L"
+        help="normal range: < 0.55 mg/L"
     )
     
     aptt = st.number_input(
         "Activated partial thromboplastin time APTT (s)",
         min_value=10.0, max_value=150.0, value=35.0, step=0.5,
-        help="normal range: 25-35s"
+        help="normal range: 22.3-32.5 s"
     )
     
     bun = st.number_input(
         "Blood urea nitrogen BUN (mmol/L)",
         min_value=0.0, max_value=80.0, value=7.0, step=0.5,
-        help="normal range: 3.2-7.1 mmol/L"
+        help="normal range: 3.1-8.0 mmol/L"
     )
     
     be = st.number_input(
         "Buffuer excess BE (mmol/L)",
         min_value=-40.0, max_value=40.0, value=0.0, step=0.5,
-        help="normal range: -2 到 +2 mmol/L"
+        help="normal range: -2-3.0 mmol/L"
     )
     
     lac = st.number_input(
         "Lactate LAC (mmol/L)",
         min_value=0.0, max_value=20.0, value=2.0, step=0.1,
-        help="normal range: 0.5-2.0 mmol/L"
+        help="normal range: 0.5-2.2 mmol/L"
     )
 
 # ========== 预测计算 ==========
