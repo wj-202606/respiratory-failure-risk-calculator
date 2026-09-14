@@ -64,7 +64,7 @@ with col1:
     )
     
     be = st.number_input(
-        "Buffuer excess BE (mmol/L)",
+        "Buffer excess BE (mmol/L)",
         min_value=-40.0, max_value=40.0, value=0.0, step=0.5,
         help="normal range: -2-3.0 mmol/L"
     )
