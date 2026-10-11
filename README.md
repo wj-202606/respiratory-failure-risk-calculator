@@ -1,8 +1,9 @@
 # Respiratory Failure In-Hospital Mortality Risk Calculator
 
-A 3-variable logistic regression model for predicting in-hospital mortality in adults with respiratory failure, developed at a single tertiary center in China and externally validated in MIMIC-IV v3.1.
-
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23300381.svg)](https://doi.org/10.5281/zenodo.23300381)
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://respiratory-failure-risk-calculator-8bdtjwjbpz4arjfskuptqp.streamlit.app)
+
+A 3-variable logistic regression model for predicting in-hospital mortality in adults with respiratory failure, developed at a single tertiary center in China and externally validated in MIMIC-IV v3.1.
 
 ## Overview
 
@@ -98,7 +99,7 @@ scipy>=1.11
 Citation
 If you use this code or the web calculator, please cite:
 
-[Authors]. External validation and recalibration of a 3-variable prognostic model for in-hospital mortality in patients with respiratory failure. [Journal]. [Year]. DOI: [to be filled]
+[Authors]. External validation and recalibration of a 3-variable prognostic model for in-hospital mortality in patients with respiratory failure. [Journal]. [Year]. Code and web calculator: https://doi.org/10.5281/zenodo.23300381
 
 License
 This project is licensed under the MIT License - see LICENSE for details.
@@ -111,12 +112,11 @@ This web calculator is a research tool and is not a validated clinical device. T
 
 text
 
-## 保存并提交
+## 保存并推送
 
-1. VS Code 里 `Ctrl+S` 保存
-2. 回到 CMD：
+VS Code `Ctrl+S` 保存后，回到 CMD：
 
 ```cmd
 git add README.md
-git commit -m "Fix app.py filename and path placeholders in README"
+git commit -m "Add Zenodo DOI badge and citation"
 git push origin main
