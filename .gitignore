@@ -1,0 +1,31 @@
+# Data files (patient-level, do not upload)
+results/
+data/
+*.csv
+*.rds
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Figures (regenerate locally)
+figures/
