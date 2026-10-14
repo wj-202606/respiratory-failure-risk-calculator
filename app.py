@@ -4,16 +4,20 @@ Respiratory Failure In-Hospital Mortality Risk Calculator
 
 Models:
   Primary (BE):      LP = 1.7933 - 0.1256*ALB + 0.0390*BUN - 0.0387*BE
-  Sensitivity (HCO3): LP = 3.2028 - 0.1277*ALB + 0.0353*BUN - 0.0523*HCO3_
+  Sensitivity (HCO3): LP = 2.6650 - 0.1242*ALB + 0.0417*BUN - 0.0381*HCO3_
 
 External validation (MIMIC-IV v3.1):
-  BE model:   n=434, 88 deaths, AUC 0.6187 (0.5517-0.6815)
+  BE model:   n=434, 88 deaths, AUC 0.6187 (0.5525-0.6823)
               recalibration: logit(p_new) = 0.4042*logit(p) - 0.6358
-  HCO3 model: n=684, 109 deaths, AUC 0.6410 (0.5862-0.6949)
-              recalibration: logit(p_new) = 0.4808*logit(p) - 0.1779
+  HCO3 model: n=684, 109 deaths, AUC 0.6410 (0.5877-0.6950)
+              recalibration: logit(p_new) = 0.4825*logit(p) - 0.7891
 
-DCA: recalibrated model shows positive net benefit vs treat-all
-     across threshold probabilities 10%-30% (greatest gain at 15%-20%)
+DCA: recalibrated BE model shows positive net benefit vs treat-all
+     across threshold probabilities 10%-30% (greatest gain at 15%-20%).
+     Recalibrated HCO3 model shows positive net benefit vs treat-all
+     at 10%-20% thresholds; at 20% the benefit is slightly lower than
+     the original model (0.0124 vs 0.0150), indicating that the benefit
+     of recalibration is threshold-dependent.
 
 Limitations:
   - Recalibration was apparent (fitted and evaluated on the same external cohort),
@@ -51,16 +55,16 @@ BE_COEF = {
 BE_RECAL_A = 0.4042
 BE_RECAL_B = -0.6358
 
-# Sensitivity model: HCO3- version (original scale, not standardized)
-HCO3_INTERCEPT = 3.2028
+# Sensitivity model: HCO3- version (original scale, 50-imputation pooled, v1.1.0)
+HCO3_INTERCEPT = 2.6650
 HCO3_COEF = {
-    "ALB":   -0.1277,
-    "BUN":    0.0353,
-    "HCO3_": -0.0523,
+    "ALB":   -0.1242,
+    "BUN":    0.0417,
+    "HCO3_": -0.0381,
 }
-# HCO3- recalibration parameters
-HCO3_RECAL_A = 0.4808
-HCO3_RECAL_B = -0.1779
+# HCO3- recalibration parameters (re-fitted on MIMIC-IV after coefficient update)
+HCO3_RECAL_A = 0.4825
+HCO3_RECAL_B = -0.7891
 
 # ========== Sidebar: model information ==========
 st.sidebar.header("📊 Model Information")
@@ -75,19 +79,21 @@ st.sidebar.markdown(
 st.sidebar.markdown("**External validation (MIMIC-IV v3.1)**")
 st.sidebar.markdown(
     "- **BE model**: n = 434, 88 deaths\n"
-    "  - AUC 0.619 (95% CI 0.552–0.682)\n"
+    "  - AUC 0.619 (95% CI 0.553–0.682)\n"
     "  - Calibration slope 0.404, intercept −0.636 (before recalibration)\n"
     "  - After recalibration: slope 1.000, intercept 0.000; Brier 0.166 → 0.158\n"
     "- **HCO₃⁻ model**: n = 684, 109 deaths\n"
-    "  - AUC 0.641 (95% CI 0.586–0.695)\n"
-    "  - Calibration slope 0.480, intercept −0.804 (before recalibration)\n"
-    "  - After recalibration: slope 1.001, intercept 0.001; Brier 0.143 → 0.131"
+    "  - AUC 0.641 (95% CI 0.588–0.695)\n"
+    "  - Calibration slope 0.483, intercept −0.789 (before recalibration)\n"
+    "  - After recalibration: slope 1.001, intercept 0.001; Brier 0.137 → 0.131"
 )
 
 st.sidebar.markdown("**Clinical utility (DCA)**")
 st.sidebar.markdown(
-    "- Recalibrated model shows positive net benefit vs treat-all\n"
-    "- Useful threshold range: **10%–30%** (greatest gain at 15%–20%)"
+    "- Recalibrated BE model shows positive net benefit vs treat-all\n"
+    "  across **10%–30%** (greatest gain at 15%–20%)\n"
+    "- Recalibrated HCO₃⁻ model shows positive net benefit at **10%–20%**\n"
+    "  (at 20%, benefit is slightly lower than the original model)"
 )
 
 st.sidebar.markdown("---")
@@ -199,12 +205,13 @@ with col2:
                          "outperforms treat-all.")
         elif p_recal < 0.30:
             risk_level = "🟠 High risk (20–30%)"
-            risk_note = ("Within the DCA-supported range; greatest net benefit "
-                         "observed here.")
+            risk_note = ("Within the DCA-supported range; net benefit in this "
+                         "range is smaller than at 10%–20%, and for the HCO₃⁻ "
+                         "model it is slightly lower than the original model.")
         else:
             risk_level = "🔴 Very high risk (≥30%)"
-            risk_note = ("Above 30%; DCA net benefit was marginal in this range, "
-                         "interpret with caution.")
+            risk_note = ("Above 30%; DCA net benefit was marginal or negative in "
+                         "this range; interpret with caution.")
 
         st.markdown(f"**{risk_level}**")
         st.caption(risk_note)
@@ -218,8 +225,9 @@ with col2:
             )
             st.caption(
                 "The original model systematically overestimated mortality in the "
-                "MIMIC-IV external cohort (calibration intercept −0.64). "
-                "The recalibrated probability is the recommended output for clinical use."
+                "MIMIC-IV external cohort (BE model: calibration intercept −0.64; "
+                "HCO₃⁻ model: −0.79). The recalibrated probability is the "
+                "recommended output for clinical use."
             )
 
         # Researcher details
@@ -243,13 +251,13 @@ st.caption(
     "on 2,028 patients and externally validated in MIMIC-IV v3.1 (n = 434)."
 )
 st.caption(
-    "📌 **External validation**: AUC 0.619 (95% CI 0.552–0.682); calibration slope "
-    "0.404, intercept −0.636 before recalibration; after a single logistic "
+    "📌 **External validation (BE)**: AUC 0.619 (95% CI 0.553–0.682); calibration "
+    "slope 0.404, intercept −0.636 before recalibration; after a single logistic "
     "recalibration, slope 1.000 and intercept 0.000 (bootstrap OOB confirmed, "
     "difference < 0.002)."
 )
 st.caption(
-    "📌 **Clinical utility**: Decision curve analysis showed higher net benefit "
+    "📌 **Clinical utility (BE)**: Decision curve analysis showed higher net benefit "
     "than treat-all across threshold probabilities of 10%–30% after recalibration."
 )
 st.caption(
@@ -260,5 +268,8 @@ st.caption(
 )
 st.caption(
     "📌 **Sensitivity analysis (HCO₃⁻ model)**: n = 684, AUC 0.641 (95% CI "
-    "0.586–0.695); after recalibration, positive net benefit at 10%–20% thresholds."
+    "0.588–0.695); after recalibration (a = 0.4825, b = −0.7891), positive net "
+    "benefit over treat-all at 10%–20% thresholds; at 20% the recalibrated model "
+    "is slightly below the original model (0.0124 vs 0.0150), indicating that "
+    "the benefit of recalibration is threshold-dependent."
 )
