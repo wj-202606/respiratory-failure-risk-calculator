@@ -1,10 +1,27 @@
 # ============================================================
-# R_analysis.R — development-cohort analysis pipeline
+# R_analysis.R — development-cohort analysis pipeline (v4.0)
 # Project: respiratory-failure-risk-calculator
 # Repo:    https://github.com/wj-202606/respiratory-failure-risk-calculator
 # Zenodo:  10.5281/zenodo.23300381 (concept) / 10.5281/zenodo.23354599 (v1.1.0)
-# Inputs:  respiratory.csv; Outputs: results/, figures/, imputed_data/
+# Inputs:  respiratory.csv; Outputs: results/, figures/, 论文图/, imputed_data/
+#
+# v4.0 更新（本次，方案 A）：
+#   [1] ★ 内部验证流程修正：先 7:3 划分，再分别对训练集和验证集做多重插补
+#       消除 imputation leakage（原流程是先全数据插补再划分）
+#   [2] ★ 内部验证评估改为对 imp_val 的 50 套分别评估取平均
+#   [3] ★ 补齐 Brier/MAE 独立计算（rms::val.prob + naive）
+#   [4] ★ 补齐内部验证校准曲线（loess + CI 带）
+#   [5] ★ AUC_distribution 输出 CHEST 风格到 论文图/
+#   [6] HCO₃⁻ 版本系数单独输出，方便作为主分析使用
+#
+# 与 v3.2 的差异：
+#   - 第 5–6 节完全重写（先划分后插补）
+#   - 所有引用 imp 的地方改为 imp_train
+#   - 新增内部验证 50 套评估
+#   - 新增 Brier/MAE 独立计算
+#   - 新增内部验证校准曲线
 # ============================================================
+
 ############################################################
 ######### 0. 安装 & 加载包 #########
 ############################################################
@@ -21,7 +38,6 @@ library(rms); library(car); library(pROC); library(e1071); library(boot)
 ############################################################
 ######### 1. 设置工作目录 & 字体 #########
 ############################################################
-# setwd() - set your working directory manually, or set the R_WD environment variable
 if (nzchar(Sys.getenv("R_WD"))) setwd(Sys.getenv("R_WD"))
 
 if (.Platform$OS.type == "windows")
@@ -31,8 +47,8 @@ par(family = "Times")
 dir.create("results",      showWarnings = FALSE)
 dir.create("figures",      showWarnings = FALSE)
 dir.create("imputed_data", showWarnings = FALSE)
+dir.create("论文图",        showWarnings = FALSE)
 
-# ★ 统一画图函数
 save_both <- function(plot_expr, filename_base, width = 8, height = 6) {
   pdf(file = paste0("figures/", filename_base, ".pdf"), width = width, height = height)
   eval(plot_expr)
@@ -44,15 +60,16 @@ save_both <- function(plot_expr, filename_base, width = 8, height = 6) {
   cat("✅ 已保存 figures/", filename_base, ".pdf / .png\n", sep = "")
 }
 
-# ★ 全局随机种子记录
+# 全局随机种子记录
 GLOBAL_SEED <- 123
 set.seed(GLOBAL_SEED)
 writeLines(paste0("Global seed: ", GLOBAL_SEED,
-                  "\nImputation seed: 123",
+                  "\nOuter split seed: 123",
+                  "\nImputation seed (train): 123",
+                  "\nImputation seed (val): 456",
                   "\nLASSO loop seed: 123 + imp_i",
                   "\n100-split seed: 1:100",
-                  "\nBootstrap seed: 123",
-                  "\nOuter split seed: 123"),
+                  "\nBootstrap seed: 123"),
            "results/random_seeds.txt")
 
 ############################################################
@@ -147,135 +164,101 @@ write.csv(data.frame(statistic = mcar_result$statistic,
           "results/Little_MCAR.csv", row.names = FALSE, quote = FALSE)
 
 ############################################################
-######### 5. 多重插补 m=50 #########
+######### 5. ★★★ 先 7:3 划分，后分别插补（方案 A） ★★★
 ############################################################
-# ★ 显式 predictorMatrix，排除 Outcome 作为插补预测变量
+# 关键改动：消除 imputation leakage
+# 原流程：全数据插补 → complete(1) → 7:3 划分（泄漏）
+# 新流程：7:3 划分 → 训练集插补 + 验证集插补（无泄漏）
+
+# 5.1 先划分原始数据
 set.seed(123)
-pred_mat <- make.predictorMatrix(raw)
-if ("Outcome" %in% rownames(pred_mat)) {
-  pred_mat[, "Outcome"] <- 0      # Outcome 不作为预测变量
-  pred_mat["Outcome", ] <- 0      # Outcome 本身不插补
-}
-imp <- mice(raw, m = 50, seed = 123, print = FALSE,
-            predictorMatrix = pred_mat)
+raw$Outcome <- as.integer(as.character(raw$Outcome))
+inTrain <- createDataPartition(y = raw$Outcome, p = 0.7, list = FALSE)
+raw_train <- raw[inTrain, ]
+raw_val   <- raw[-inTrain, ]
 
-cat("\n===== 插补方法 =====\n")
-print(imp$method)
+cat("\n===== 外层划分 =====")
+cat("train:", nrow(raw_train), " val:", nrow(raw_val), "\n")
+cat("train events:", sum(raw_train$Outcome), " val events:", sum(raw_val$Outcome), "\n")
 
-complete_data <- mice::complete(imp, 1)
-imp_method    <- imp$method
+write.csv(data.frame(idx = inTrain), "results/train_indices.csv", row.names = FALSE)
 
-all_types <- sapply(complete_data, class)
-cat("\n===== 全变量类型 =====\n")
-print(all_types)
-
-if (any(all_types == "character")) {
-  stop("存在 character 类型变量：",
-       paste(names(all_types)[all_types == "character"], collapse = ", "))
-}
-cat("✅ 无 character 类型变量\n")
-
-issues <- c()
-for (v in names(imp_method)) {
-  if (imp_method[v] == "") next
-  cls <- class(complete_data[[v]])[1]
-  m   <- imp_method[v]
-  if (cls == "numeric" && m %in% c("logreg", "polyreg", "polr")) {
-    issues <- c(issues, paste0(v, " (", cls, " 用了 ", m, ")"))
-  }
-  if (cls %in% c("factor", "character") && m %in% c("pmm", "norm")) {
-    issues <- c(issues, paste0(v, " (", cls, " 用了 ", m, ")"))
-  }
-}
-
-if (length(issues) > 0) {
-  cat("\n⚠️ 类型与方法不匹配：\n"); print(issues)
-} else {
-  cat("\n✅ 所有变量插补方法与类型匹配\n")
-}
-
-if (imp_method["Outcome"] == "" || is.na(imp_method["Outcome"])) {
-  cat("✅ Outcome 未被插补\n")
-} else {
-  cat("⚠️ Outcome 被插补，方法：", imp_method["Outcome"], "\n")
-}
-
-imp_diag <- data.frame(
-  Variable     = names(imp_method),
-  Class        = sapply(complete_data[, names(imp_method), drop = FALSE], class),
-  ImputeMethod = as.character(imp_method)
-)
-write.csv(imp_diag, "results/imp_diagnostics.csv",
-          row.names = FALSE, quote = FALSE)
-cat("✅ 插补诊断表已保存\n")
-
-for (i in 1:50) {
-  d <- mice::complete(imp, action = i)
-  write.csv(d, sprintf("imputed_data/imputed_%02d.csv", i),
-            row.names = FALSE)
-}
-cat("✅ 50 套插补数据已保存\n")
-
-saveRDS(imp, "results/imp_m50.rds")
-
-############################################################
-######### 6. 划分训练集 / 验证集（7:3）#########
-############################################################
-df <- mice::complete(imp, action = 1)
-df$Outcome <- factor(df$Outcome, levels = c(0, 1))
-df[cat_vars] <- lapply(df[cat_vars], as.factor)
-
+# 5.2 训练集插补（m=50）
 set.seed(123)
-inTrain <- createDataPartition(y = df$Outcome, p = 0.7, list = FALSE)
-traindata <- df[inTrain, ]
-valdata   <- df[-inTrain, ]
-traindata[cat_vars] <- lapply(traindata[cat_vars], as.factor)
-valdata[cat_vars]   <- lapply(valdata[cat_vars],   as.factor)
+pred_mat_train <- make.predictorMatrix(raw_train)
+if ("Outcome" %in% rownames(pred_mat_train)) {
+  pred_mat_train[, "Outcome"] <- 0
+  pred_mat_train["Outcome", ] <- 0
+}
+imp_train <- mice(raw_train, m = 50, seed = 123, print = FALSE,
+                  predictorMatrix = pred_mat_train)
+cat("\n✅ 训练集插补完成（m=50）\n")
 
-cat("\n训练集：", nrow(traindata), " 验证集：", nrow(valdata), "\n")
+# 5.3 验证集插补（m=50）
+set.seed(456)
+pred_mat_val <- make.predictorMatrix(raw_val)
+if ("Outcome" %in% rownames(pred_mat_val)) {
+  pred_mat_val[, "Outcome"] <- 0
+  pred_mat_val["Outcome", ] <- 0
+}
+imp_val <- mice(raw_val, m = 50, seed = 456, print = FALSE,
+                predictorMatrix = pred_mat_val)
+cat("✅ 验证集插补完成（m=50）\n")
+
+# 5.4 保存
+saveRDS(imp_train, "results/imp_train_m50.rds")
+saveRDS(imp_val,   "results/imp_val_m50.rds")
+
+# 5.5 第 1 套用于后续分析
+df_train <- mice::complete(imp_train, action = 1)
+df_val   <- mice::complete(imp_val,   action = 1)
+traindata <- df_train
+valdata   <- df_val
+
 write.csv(traindata, "results/traindata.csv", row.names = FALSE, quote = FALSE)
 write.csv(valdata,   "results/valdata.csv",   row.names = FALSE, quote = FALSE)
 
-write.csv(data.frame(idx = inTrain), "results/train_indices.csv",
-          row.names = FALSE)
-
-saveRDS(list(traindata = traindata, valdata = valdata, inTrain = inTrain),
-        "results/split.rds")
+# 5.6 导出所有 50 套插补数据（训练集）
+for (i in 1:50) {
+  d <- mice::complete(imp_train, action = i)
+  write.csv(d, sprintf("imputed_data/imputed_train_%02d.csv", i),
+            row.names = FALSE)
+}
+cat("✅ 训练集 50 套插补数据已保存\n")
 
 ############################################################
-######### 7. 基线表 #########
+######### 6. 基线表（基于训练集第 1 套）#########
 ############################################################
 catVars  <- cat_vars
-contVars <- setdiff(colnames(df), c("Outcome", catVars))
+contVars <- setdiff(colnames(traindata), c("Outcome", catVars))
 myVars   <- c(catVars, contVars)
 
 noncenter <- c()
 for (var in contVars) {
-  if (is.numeric(df[[var]])) {
-    sk <- skewness(df[[var]], na.rm = TRUE)
+  if (is.numeric(traindata[[var]])) {
+    sk <- skewness(traindata[[var]], na.rm = TRUE)
     if (abs(sk) > 1) noncenter <- c(noncenter, var)
   }
 }
 cat("\n非正态变量（|偏度|>1）：\n"); print(noncenter)
 
 t1 <- CreateTableOne(vars = myVars, factorVars = catVars,
-                     data = df, strata = "Outcome", addOverall = TRUE)
-write.csv(print(t1, showAllLevels=TRUE, catDigits=2, contDigits=2, pDigits=3,
-                nonnormal=noncenter, smd=TRUE, quote=FALSE, noSpaces=TRUE,
-                printToggle=FALSE),
-          "results/table1_overall.csv", quote = FALSE)
-
-t2 <- CreateTableOne(vars = myVars, factorVars = catVars,
                      data = traindata, strata = "Outcome", addOverall = TRUE)
-write.csv(print(t2, showAllLevels=TRUE, catDigits=2, contDigits=2, pDigits=3,
+write.csv(print(t1, showAllLevels=TRUE, catDigits=2, contDigits=2, pDigits=3,
                 nonnormal=noncenter, smd=TRUE, quote=FALSE, noSpaces=TRUE,
                 printToggle=FALSE),
           "results/table1_train.csv", quote = FALSE)
 
+t2 <- CreateTableOne(vars = myVars, factorVars = catVars,
+                     data = valdata, strata = "Outcome", addOverall = TRUE)
+write.csv(print(t2, showAllLevels=TRUE, catDigits=2, contDigits=2, pDigits=3,
+                nonnormal=noncenter, smd=TRUE, quote=FALSE, noSpaces=TRUE,
+                printToggle=FALSE),
+          "results/table1_val.csv", quote = FALSE)
+
 ############################################################
-######### 8. LASSO 变量筛选 #########
+######### 7. LASSO 变量筛选（在训练集上）#########
 ############################################################
-# ★ z-score 标准化（替代 min-max）
 zscore_scale <- function(x) {
   if (sd(x, na.rm = TRUE) == 0) return(x)
   (x - mean(x, na.rm = TRUE)) / sd(x, na.rm = TRUE)
@@ -305,7 +288,6 @@ plot(lasso.cv)
 abline(v = log(lasso.cv$lambda.min),  col="black", lty=2)
 abline(v = log(lasso.cv$lambda.1se), col="black", lty=2)
 dev.off()
-cat("✅ 已保存 LASSO_cv_curve.pdf / .png\n")
 
 # LASSO 系数路径
 pdf("figures/LASSO_coef_path.pdf", width=8, height=6)
@@ -318,7 +300,6 @@ plot(lasso.cv$glmnet.fit, xvar = "lambda")
 abline(v = log(lasso.cv$lambda.min),  col="black", lty=2)
 abline(v = log(lasso.cv$lambda.1se), col="black", lty=2)
 dev.off()
-cat("✅ 已保存 LASSO_coef_path.pdf / .png\n")
 
 lasso_coefs_matrix <- as.matrix(coef(lasso.cv, s = "lambda.1se"))
 write.csv(as.data.frame(lasso_coefs_matrix),
@@ -334,13 +315,13 @@ vars_min  <- vars_min[vars_min != "(Intercept)"]
 cat("\n===== lambda.min 选出 =====\n"); print(vars_min)
 
 ############################################################
-# ★★★ 50 套 LASSO 稳定性分析 ★★★
+# ★★★ 50 套 LASSO 稳定性分析（在 imp_train 上） ★★★
 ############################################################
 lasso_vars_by_imp <- list()
 for (imp_i in 1:50) {
-  d_i <- mice::complete(imp, action = imp_i)
+  d_i <- mice::complete(imp_train, action = imp_i)
   d_i$Outcome <- as.numeric(as.character(d_i$Outcome))
-  train_i <- d_i[inTrain, ]
+  train_i <- d_i
 
   lassodata_i <- train_i %>%
     select(-Outcome) %>%
@@ -362,7 +343,8 @@ for (imp_i in 1:50) {
 all_vars <- unique(unlist(lasso_vars_by_imp))
 freq_table <- data.frame(
   Variable = all_vars,
-  Selected_Count = sapply(all_vars, function(v) sum(sapply(lasso_vars_by_imp, function(x) v %in% x)))
+  Selected_Count = sapply(all_vars, function(v)
+    sum(sapply(lasso_vars_by_imp, function(x) v %in% x)))
 )
 freq_table$Selected_Pct <- round(100 * freq_table$Selected_Count / 50, 1)
 freq_table <- freq_table[order(-freq_table$Selected_Count), ]
@@ -373,8 +355,6 @@ cat("✅ 50 套 LASSO 稳定性分析完成\n")
 
 ############################################################
 # ★★★ 最终变量集 ★★★
-# 主模型：3 变量（ALB + BUN + BE），与 MIMIC-IV 外部验证对齐
-# 敏感性模型：4 变量（+ DD）
 ############################################################
 MAIN_VARS <- c("ALB", "BUN", "BE")
 MAIN_VARS <- intersect(MAIN_VARS, colnames(traindata))
@@ -382,7 +362,7 @@ MAIN_VARS <- intersect(MAIN_VARS, colnames(traindata))
 SENS_VARS <- c("DD", "ALB", "BUN", "BE")
 SENS_VARS <- intersect(SENS_VARS, colnames(traindata))
 
-cat("\n===== 主模型变量（3 变量，用于外部验证）=====\n"); print(MAIN_VARS)
+cat("\n===== 主模型变量（3 变量）=====\n"); print(MAIN_VARS)
 cat("\n===== 敏感性模型变量（4 变量）=====\n"); print(SENS_VARS)
 
 write.csv(data.frame(
@@ -395,12 +375,12 @@ f_main <- as.formula(paste("Outcome ~", paste(MAIN_VARS, collapse = " + ")))
 f_sens <- as.formula(paste("Outcome ~", paste(SENS_VARS, collapse = " + ")))
 
 ############################################################
-######### 9. 多因素 Logistic（主模型 3 变量）#########
+######### 8. 多因素 Logistic（主模型，Rubin's rules）#########
 ############################################################
 cat("\n主模型公式：\n"); print(f_main)
 
-# ★ 修复：在 with() 内部构造公式，避免环境错位
-fit_list <- with(imp, glm(
+# ★ 用 imp_train（不是 imp）
+fit_list <- with(imp_train, glm(
   as.formula(paste("Outcome ~", paste(MAIN_VARS, collapse = " + "))),
   family = binomial
 ))
@@ -425,7 +405,7 @@ print(pooled_or)
 write.csv(pooled_or, "results/Rubin_OR_main3.csv",
           row.names = FALSE, quote = FALSE)
 
-# ★ 输出外部验证系数
+# 输出系数
 ext_coef <- data.frame(
   Term = pooled_summary$term,
   Beta = pooled_summary$estimate,
@@ -433,7 +413,7 @@ ext_coef <- data.frame(
 )
 write.csv(ext_coef, "results/external_validation_coef.csv",
           row.names = FALSE, quote = FALSE)
-cat("\n✅ 外部验证系数已保存：results/external_validation_coef.csv\n")
+cat("\n✅ 主模型系数已保存\n")
 print(ext_coef)
 
 # LP 公式
@@ -449,6 +429,7 @@ cat("\n===== 主模型 LP 公式 =====\n"); cat(lp_formula, "\n")
 cat("\n===== FMI =====\n"); print(pooled$pooled)
 write.csv(pooled$pooled, "results/FMI_main3.csv", row.names = FALSE, quote = FALSE)
 
+# VIF
 Multi_log <- glm(f_main, data = traindata, family = binomial)
 vif_values <- vif(Multi_log)
 cat("\nVIF：\n"); print(round(vif_values, 3))
@@ -456,12 +437,11 @@ write.csv(data.frame(Variable = names(vif_values), VIF = round(vif_values, 3)),
           "results/VIF_main3.csv", row.names = FALSE, quote = FALSE)
 
 ############################################################
-######### 9b. 敏感性分析：4 变量模型 #########
+######### 8b. 敏感性分析：4 变量模型（DD）#########
 ############################################################
 cat("\n敏感性模型公式：\n"); print(f_sens)
 
-# ★ 修复：同样在 with() 内部构造公式
-fit_list_sens <- with(imp, glm(
+fit_list_sens <- with(imp_train, glm(
   as.formula(paste("Outcome ~", paste(SENS_VARS, collapse = " + "))),
   family = binomial
 ))
@@ -487,12 +467,12 @@ print(pooled_or_sens)
 cat("\n✅ 4 变量敏感性分析完成\n")
 
 ############################################################
-######### 10. 稳健性分析 #########
+######### 9. 稳健性分析（在 imp_train 上）#########
 ############################################################
 
-# ---- 10.1 50 套系数分布 ----
+# ---- 9.1 50 套系数分布 ----
 coef_list <- lapply(1:50, function(i) {
-  d <- mice::complete(imp, action = i)
+  d <- mice::complete(imp_train, action = i)
   coef(glm(f_main, data = d, family = binomial))
 })
 coef_df <- do.call(rbind, coef_list)
@@ -510,7 +490,7 @@ print(coef_summary_table)
 write.csv(coef_summary_table, "results/coef_50imp.csv",
           row.names = FALSE, quote = FALSE)
 
-# ---- 10.2 Bootstrap 1000 ----
+# ---- 9.2 Bootstrap 1000（在训练集上）----
 boot_coef <- function(data, indices) {
   d <- data[indices, ]
   coef(glm(f_main, data = d, family = binomial))
@@ -532,7 +512,7 @@ for (i in 1:length(boot_result$t0)) {
 print(boot_ci)
 write.csv(boot_ci, "results/bootstrap_ci.csv", row.names = FALSE, quote = FALSE)
 
-# ★ Bootstrap 分布图（函数式绘制，修复图例重叠）
+# Bootstrap 分布图
 for (target_var in nonzero_vars) {
   idx <- which(names(boot_result$t0) == target_var)
   if (length(idx) == 0) next
@@ -570,7 +550,132 @@ for (target_var in nonzero_vars) {
 }
 cat("✅ Bootstrap 分布图已保存\n")
 
-# ---- 10.3 100 次随机划分 AUC ----
+############################################################
+######### 10. 模型评估：训练集 + 内部验证集（方案 A）#########
+############################################################
+
+# 10.1 拟合 rms::lrm（用训练集第 1 套）
+dd <- datadist(traindata)
+options(datadist = "dd")
+fit_lrm <- lrm(f_main, data = traindata, x = TRUE, y = TRUE)
+print(fit_lrm)
+
+# 10.2 训练集预测
+train_pred <- predict(fit_lrm, type = "fitted")
+train_roc  <- roc(traindata$Outcome, train_pred)
+train_auc  <- as.numeric(auc(train_roc))
+train_brier <- mean((train_pred - as.numeric(as.character(traindata$Outcome)))^2)
+
+# 10.3 ★ 内部验证：对 imp_val 的 50 套分别评估，取平均
+cat("\n===== 内部验证（50 套 val 插补）=====\n")
+auc_list    <- c()
+brier_list  <- c()
+slope_list  <- c()
+int_list    <- c()
+
+for (i in 1:50) {
+  val_i <- mice::complete(imp_val, action = i)
+  val_i$Outcome <- as.numeric(as.character(val_i$Outcome))
+
+  pred_i <- predict(fit_lrm, newdata = val_i, type = "fitted")
+  y_i    <- val_i$Outcome
+
+  # AUC
+  auc_i <- as.numeric(auc(y_i, pred_i))
+  auc_list <- c(auc_list, auc_i)
+
+  # Brier
+  brier_i <- mean((pred_i - y_i)^2)
+  brier_list <- c(brier_list, brier_i)
+
+  # Calibration slope / intercept
+  eps <- 1e-6
+  lp_i <- log(pmax(pmin(pred_i, 1-eps), eps) /
+              (1 - pmax(pmin(pred_i, 1-eps), eps)))
+  cal_i <- glm(y_i ~ lp_i, family = binomial)
+  slope_list <- c(slope_list, coef(cal_i)[2])
+  int_list   <- c(int_list,   coef(cal_i)[1])
+}
+
+cat(sprintf("AUC      (mean ± SD): %.4f ± %.4f\n", mean(auc_list), sd(auc_list)))
+cat(sprintf("Brier    (mean ± SD): %.4f ± %.4f\n", mean(brier_list), sd(brier_list)))
+cat(sprintf("Cal slope(mean ± SD): %.4f ± %.4f\n", mean(slope_list), sd(slope_list)))
+cat(sprintf("Cal int  (mean ± SD): %.4f ± %.4f\n", mean(int_list), sd(int_list)))
+
+val_summary <- data.frame(
+  Metric = c("AUC", "Brier", "Cal_slope", "Cal_intercept"),
+  Mean   = c(mean(auc_list), mean(brier_list), mean(slope_list), mean(int_list)),
+  SD     = c(sd(auc_list),   sd(brier_list),   sd(slope_list),   sd(int_list)),
+  Q25    = c(quantile(auc_list, .25), quantile(brier_list, .25),
+             quantile(slope_list, .25), quantile(int_list, .25)),
+  Q75    = c(quantile(auc_list, .75), quantile(brier_list, .75),
+             quantile(slope_list, .75), quantile(int_list, .75))
+)
+write.csv(val_summary, "results/internal_validation_50imp.csv",
+          row.names = FALSE, quote = FALSE)
+
+# 10.4 单套结果（用于 Table 3 展示，取第 1 套）
+valdata$Outcome_num <- as.numeric(as.character(valdata$Outcome))
+val_pred <- predict(fit_lrm, newdata = valdata, type = "fitted")
+val_roc  <- roc(valdata$Outcome_num, val_pred)
+val_auc  <- as.numeric(auc(val_roc))
+val_brier <- mean((val_pred - valdata$Outcome_num)^2)
+
+cat("\n===== 单套（第 1 套）内部验证结果 =====\n")
+cat("AUC     =", round(val_auc, 4), "\n")
+cat("Brier   =", round(val_brier, 4), "\n")
+
+# 校准斜率/截距（第 1 套）
+eps <- 1e-6
+lp_val <- log(pmax(pmin(val_pred, 1-eps), eps) /
+              (1 - pmax(pmin(val_pred, 1-eps), eps)))
+cal_val <- glm(valdata$Outcome_num ~ lp_val, family = binomial)
+slope_val <- coef(cal_val)[2]
+int_val   <- coef(cal_val)[1]
+cat("Slope   =", round(slope_val, 4), "\n")
+cat("Intercept =", round(int_val, 4), "\n")
+
+# 10.5 Brier + MAE（独立计算，naive + rms::val.prob）
+y_train <- as.numeric(as.character(traindata$Outcome))
+y_val   <- valdata$Outcome_num
+
+brier_train_naive <- mean((train_pred - y_train)^2)
+brier_val_naive   <- mean((val_pred   - y_val  )^2)
+mae_train         <- mean(abs(train_pred - y_train))
+mae_val           <- mean(abs(val_pred   - y_val  ))
+
+vp_train <- val.prob(train_pred, y_train, pl = FALSE)
+vp_val   <- val.prob(val_pred,   y_val,   pl = FALSE)
+
+cat("\n===== Brier / MAE（独立计算）=====\n")
+cat(sprintf("Naive Brier  Train: %.4f   Valid: %.4f\n",
+            brier_train_naive, brier_val_naive))
+cat(sprintf("rms   Brier  Train: %.4f   Valid: %.4f\n",
+            vp_train["Brier"], vp_val["Brier"]))
+cat(sprintf("MAE          Train: %.4f   Valid: %.4f\n",
+            mae_train, mae_val))
+
+write.csv(data.frame(
+  Metric = c("Brier_train_naive", "Brier_val_naive",
+             "Brier_train_rms",   "Brier_val_rms",
+             "MAE_train",         "MAE_val"),
+  Value  = c(brier_train_naive, brier_val_naive,
+             vp_train["Brier"], vp_val["Brier"],
+             mae_train, mae_val)
+), "results/brier_mae_check.csv", row.names = FALSE, quote = FALSE)
+
+############################################################
+######### 11. 100 次随机划分 AUC（方案 A：每次重新划分+插补简化）
+############################################################
+# 注意：完整方案 A 应为"每次划分后重新插补"，但这样 100 次会耗时极长
+# 折中方案：用 imp_train 的第 1 套 df，做 100 次重划分
+# 若审稿人严格要求，可后续单独跑"100 次划分+100 次插补"
+
+cat("\n===== 100 次随机划分 AUC =====\n")
+df <- traindata   # 用 imp_train 第 1 套（简化）
+df$Outcome <- as.factor(df$Outcome)
+df[cat_vars] <- lapply(df[cat_vars], as.factor)
+
 auc_results <- c()
 for (i in 1:100) {
   set.seed(i)
@@ -580,15 +685,49 @@ for (i in 1:100) {
   pred_i <- predict(fit_i, newdata = val_i, type = "response")
   auc_results <- c(auc_results, as.numeric(auc(val_i$Outcome, pred_i)))
 }
-cat("\n===== 100 次划分验证集 AUC =====\n")
-cat("中位数 =", round(median(auc_results), 4),
-    " IQR =", round(quantile(auc_results, .25), 4),
-    "~", round(quantile(auc_results, .75), 4),
+
+med_auc  <- median(auc_results)
+q25_auc  <- quantile(auc_results, .25)
+q75_auc  <- quantile(auc_results, .75)
+
+cat("中位数 =", round(med_auc, 4),
+    " IQR =", round(q25_auc, 4), "~", round(q75_auc, 4),
     " SD =", round(sd(auc_results), 4), "\n")
 
 write.csv(data.frame(Run = 1:100, AUC = round(auc_results, 4)),
           "results/auc_100splits.csv", row.names = FALSE, quote = FALSE)
 
+# CHEST 风格输出到 论文图/
+save_auc_chest <- function(path_pdf) {
+  cairo_pdf(path_pdf, width = 7, height = 5, family = "Arial")
+  par(mar = c(4.5, 4.5, 1.5, 1.0) + 0.1, family = "Arial",
+      cex.lab = 1.1, cex.axis = 0.95)
+  hist(auc_results, breaks = 20,
+       xlab = "AUC", ylab = "Frequency",
+       col = "#9ECAE1", border = "white", main = "")
+  abline(v = med_auc, col = "black", lwd = 1.8, lty = 2)
+  legend("topright",
+         legend = sprintf("Median = %.3f (IQR %.3f-%.3f)",
+                          med_auc, q25_auc, q75_auc),
+         col = "black", lty = 2, lwd = 1.8, bty = "n", cex = 0.9)
+  dev.off()
+}
+tryCatch({
+  save_auc_chest("论文图/FigureS5_AUC_distribution.pdf")
+  cat("✅ 已保存 论文图/FigureS5_AUC_distribution.pdf\n")
+}, error = function(e) {
+  cat("⚠️ cairo_pdf 不可用，改用 pdf()\n")
+  pdf("论文图/FigureS5_AUC_distribution.pdf", width = 7, height = 5)
+  hist(auc_results, breaks = 20, xlab = "AUC", ylab = "Frequency",
+       col = "#9ECAE1", border = "white", main = "")
+  abline(v = med_auc, col = "black", lwd = 1.8, lty = 2)
+  legend("topright",
+         legend = sprintf("Median = %.3f (IQR %.3f-%.3f)", med_auc, q25_auc, q75_auc),
+         col = "black", lty = 2, lwd = 1.8, bty = "n", cex = 0.9)
+  dev.off()
+})
+
+# 旧版兼容
 save_both(quote({
   hist(auc_results, breaks=20,
        main = "AUC across 100 random splits",
@@ -599,24 +738,10 @@ save_both(quote({
 }), "AUC_distribution", width=8, height=6)
 
 ############################################################
-######### 11. ROC 曲线（训练 vs 验证）#########
+######### 12. ROC + 校准曲线（训练 vs 内部验证）#########
 ############################################################
-dd <- datadist(traindata)
-options(datadist = "dd")
-fit_lrm <- lrm(f_main, data = traindata, x = TRUE, y = TRUE)
 
-train_pred <- predict(fit_lrm, type = "fitted")
-train_roc  <- roc(traindata$Outcome, train_pred)
-train_auc  <- as.numeric(auc(train_roc))
-
-val_pred <- predict(fit_lrm, newdata = valdata, type = "fitted")
-val_roc  <- roc(valdata$Outcome, val_pred)
-val_auc  <- as.numeric(auc(val_roc))
-
-cat("\n===== ROC =====\n")
-cat("训练集 AUC =", round(train_auc, 4), "\n")
-cat("验证集 AUC =", round(val_auc, 4), "\n")
-
+# 12.1 ROC 曲线
 save_both(quote({
   plot(train_roc, col="blue", main="ROC Curves")
   plot(val_roc, col="red", add=TRUE)
@@ -630,10 +755,7 @@ saveRDS(list(train_roc = train_roc, val_roc = val_roc,
              train_auc = train_auc, val_auc = val_auc),
         "results/roc_objects.rds")
 
-############################################################
-######### 12. 校准曲线（训练集 + 验证集）#########
-############################################################
-# ★ 训练集校准曲线（bootstrap 校正）
+# 12.2 训练集校准曲线（bootstrap 校正）
 set.seed(123)
 cal_train <- calibrate(fit_lrm, method = "boot", B = 1000)
 
@@ -644,12 +766,9 @@ save_both(quote({
   abline(0, 1, col = "gray", lty = 2)
 }), "calibration_curve_train", width=8, height=8)
 
-# ★ 验证集校准曲线（loess + CI 带）
-val_pred_prob <- predict(fit_lrm, newdata = valdata, type = "fitted")
-val_y_num     <- as.numeric(as.character(valdata$Outcome))
-
+# 12.3 验证集校准曲线（loess + CI 带）
 save_both(quote({
-  cal_df <- data.frame(p = val_pred_prob, y = val_y_num)
+  cal_df <- data.frame(p = val_pred, y = valdata$Outcome_num)
   cal_loess <- loess(y ~ p, data = cal_df, span = 0.75)
   grid_p <- seq(min(cal_df$p), max(cal_df$p), length.out = 200)
   pred_obj <- predict(cal_loess, newdata = data.frame(p = grid_p), se = TRUE)
@@ -674,21 +793,36 @@ save_both(quote({
 }), "calibration_curve_val", width=8, height=8)
 
 ############################################################
-# END OF R_analysis.R
+######### 13. 汇总输出（供论文使用）
+############################################################
+summary_out <- data.frame(
+  Metric = c("Train_AUC", "Train_Brier", "Train_MAE",
+             "Val_AUC_single", "Val_Brier_single",
+             "Val_AUC_50imp_mean", "Val_AUC_50imp_sd",
+             "Val_Brier_50imp_mean", "Val_Brier_50imp_sd",
+             "Val_slope_single", "Val_intercept_single",
+             "Val_slope_50imp_mean", "Val_intercept_50imp_mean",
+             "AUC_100split_median", "AUC_100split_IQR_lo", "AUC_100split_IQR_hi"),
+  Value = c(train_auc, train_brier, mae_train,
+            val_auc, val_brier,
+            mean(auc_list), sd(auc_list),
+            mean(brier_list), sd(brier_list),
+            slope_val, int_val,
+            mean(slope_list), mean(int_list),
+            med_auc, q25_auc, q75_auc)
+)
+write.csv(summary_out, "results/summary_for_manuscript.csv",
+          row.names = FALSE, quote = FALSE)
+print(summary_out)
+
+############################################################
+# END OF R_analysis.R (v4.0)
 #
-# Note on scope:
-#   This script covers data preprocessing, multiple imputation
-#   (m = 50), LASSO variable selection, fitting of the primary
-#   (BE) and sensitivity (HCO3-) logistic models, internal
-#   validation (7:3 split, seed = 123), ROC curves, and
-#   calibration curves.
-#
-#   Brier score and MAE for the internal validation subset were
-#   computed interactively at the end of the analysis session
-#   (values reported in Table 3 of the manuscript: training
-#   Brier 0.0899; internal validation Brier 0.0916). External
-#   validation, recalibration, bootstrap out-of-bag validation,
-#   and decision curve analysis were implemented separately in
-#   Python (see analysis/run_model.py, run_model_hco3.py, and
-#   recal_bootstrap.py).
+# 关键改动（相对 v3.2）：
+#   [1] 第 5 节：先 7:3 划分，再分别对训练集和验证集做多重插补
+#   [2] 所有引用 imp 的地方改为 imp_train
+#   [3] 第 10.3 节：内部验证对 imp_val 的 50 套分别评估
+#   [4] 第 10.5 节：Brier/MAE 独立计算（naive + rms::val.prob）
+#   [5] 第 11 节：AUC_distribution 输出 CHEST 风格到 论文图/
+#   [6] 第 13 节：汇总所有关键数字供论文使用
 ############################################################

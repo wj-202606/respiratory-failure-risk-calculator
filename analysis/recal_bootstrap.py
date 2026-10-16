@@ -2,12 +2,17 @@
 """
 重校准 bootstrap 验证 + 双版本（BE / HCO3-）DCA 对比
 （v2：DCA 存盘放在第 [4/4] 节最开头，确保一定执行并打印）
+（v3：CHEST 风格 Figure 3 / Figure S4，输出到 论文图/，Arial，无图内标题，加 A/B）
+（v3.1：HCO3- 版改读 external_predictions_hco3_v2.csv（v3.2 权威 50 套合并系数）；
+       load_pred 兼容 pred_prob / p 两种列名；
+       legend 里 HCO₃⁻ 改用 mathtext HCO$_3^-$ 避免 Arial 缺字形；
+       临床区间标注 10-30% 改 hyphen）
 
 输入：
-  results/external_predictions.csv        (BE 版，n=434)
-  results/external_predictions_hco3.csv   (HCO3- 版，n=684)
+  results/external_predictions.csv            (BE 版，n=434)
+  results/external_predictions_hco3_v2.csv    (HCO3- 版 v3.2，n=684)
 
-输出：
+输出（保持不变）：
   results/recal_bootstrap_BE.csv
   results/recal_bootstrap_HCO3.csv
   results/recal_bootstrap_summary.csv
@@ -15,6 +20,10 @@
   results/dca_results_dual.csv
   figures/Fig3_DCA_dual.pdf
   figures/FigS3_recalibration_dual.pdf
+
+输出（v3 CHEST 风格）：
+  论文图/Figure3_DCA.pdf
+  论文图/FigureS4_recalibration.pdf
 
 ⚠️ BE 版：D:/mimic_wide.csv 的 be_mmol_l 是真 BE
    HCO3- 版：D:/mimic_wide_hco3.csv 的 be_mmol_l 实际是 HCO3-
@@ -39,20 +48,35 @@ from sklearn.calibration import calibration_curve
 RNG = 123
 N_BOOT = 1000
 
-BASE = os.environ.get("PROJECT_BASE", os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+BASE = os.environ.get("PROJECT_BASE", os.path.dirname(os.path.abspath(__file__)))
 RESULTS_DIR = os.path.join(BASE, "results")
 FIGURES_DIR = os.path.join(BASE, "figures")
+FIG_DIR_CHEST = os.path.join(BASE, "论文图")
 os.makedirs(RESULTS_DIR, exist_ok=True)
 os.makedirs(FIGURES_DIR, exist_ok=True)
+os.makedirs(FIG_DIR_CHEST, exist_ok=True)
 
 PRED_BE   = os.path.join(RESULTS_DIR, "external_predictions.csv")
-PRED_HCO3 = os.path.join(RESULTS_DIR, "external_predictions_hco3.csv")
+PRED_HCO3 = os.path.join(RESULTS_DIR, "external_predictions_hco3_v2.csv")  # ★ v3.1 改动
 
 print("=" * 70)
 print("Python:", sys.executable)
 print("脚本文件:", os.path.abspath(__file__))
+print("BASE:", BASE)
 print("RESULTS_DIR:", RESULTS_DIR)
+print("FIG_DIR_CHEST:", FIG_DIR_CHEST)
+print("PRED_BE   :", PRED_BE)
+print("PRED_HCO3 :", PRED_HCO3)
 print("=" * 70)
+
+# ---- CHEST style ----
+sys.path.insert(0, BASE)
+try:
+    from chest_style import apply_style
+    apply_style()
+    print("[style] chest_style applied")
+except Exception as _e:
+    print(f"[style] 未找到 chest_style，使用默认: {_e}")
 
 # ============================================================
 # 工具函数
@@ -107,16 +131,23 @@ def bootstrap_recalibration(y, p, n_boot=N_BOOT, seed=RNG):
 print("\n[1/4] 读入预测文件")
 
 def load_pred(path, label):
+    """★ v3.1：兼容 pred_prob / p 两种列名"""
     if not os.path.exists(path):
         print(f"  [{label}] 跳过：找不到 {path}")
         return None
     df = pd.read_csv(path)
-    if "outcome" not in df.columns or "pred_prob" not in df.columns:
-        raise KeyError(f"{path} 缺少 outcome/pred_prob 列")
+    if "outcome" not in df.columns:
+        raise KeyError(f"{path} 缺少 outcome 列")
+    if "pred_prob" in df.columns:
+        p_col = "pred_prob"
+    elif "p" in df.columns:
+        p_col = "p"
+    else:
+        raise KeyError(f"{path} 缺少 pred_prob / p 列")
     y = df["outcome"].values.astype(int)
-    p = df["pred_prob"].values.astype(float)
+    p = df[p_col].values.astype(float)
     print(f"  [{label}] n={len(df)}, 事件={int(y.sum())} ({y.mean()*100:.1f}%), "
-          f"pred 范围 [{p.min():.4f},{p.max():.4f}]")
+          f"pred 范围 [{p.min():.4f},{p.max():.4f}]  (col={p_col})")
     return y, p
 
 be_data   = load_pred(PRED_BE,   "BE")
@@ -237,7 +268,7 @@ print("\n[4/4] DCA + 画图")
 
 thresholds = np.arange(0.01, 0.51, 0.01)
 
-# -------- 4a. 先算并保存 DCA 数值（放在最前，保证一定执行） --------
+# -------- 4a. 先算并保存 DCA 数值 --------
 dca_dual_rows = []
 for label, data in [("BE", be_data), ("HCO3-", hco3_data)]:
     if data is None:
@@ -275,9 +306,24 @@ if dca_dual_rows:
 else:
     print("  [警告] 无 DCA 数据可保存")
 
-# -------- 4b. Fig3 双版本 DCA 曲线 --------
-fig, ax = plt.subplots(figsize=(9, 6))
-colors_be, colors_h = "steelblue", "firebrick"
+# ============================================================
+# 4b. Figure 3: DCA — CHEST 风格
+# ============================================================
+print("\n  画 Figure 3 (DCA, CHEST style) ...")
+
+# 配色
+C_BE_O   = "#9ECAE1"
+C_BE_R   = "#1F77B4"
+C_BE_TA  = "#BBBBBB"
+C_H_O    = "#F4A582"
+C_H_R    = "#B2182B"
+C_H_TA   = "#888888"
+
+# ★ v3.1：HCO3- 的图例统一用 mathtext，避免 Arial 缺字形
+HCO3_LABEL = r"HCO$_3^-$"
+
+fig, ax = plt.subplots(figsize=(7.2, 4.6))
+
 prev_max = 0.0
 
 if be_data is not None:
@@ -289,12 +335,12 @@ if be_data is not None:
     nb_r = np.array([net_benefit(y, p_r, pt) for pt in thresholds])
     prev = y.mean(); prev_max = max(prev_max, prev)
     nb_all = prev - (1 - prev) * (thresholds / (1 - thresholds))
-    ax.plot(thresholds, nb_o, color=colors_be, lw=1.6, ls="--",
+    ax.plot(thresholds, nb_o, color=C_BE_O, lw=1.1, ls="--",
             label="BE original")
-    ax.plot(thresholds, nb_r, color=colors_be, lw=2.2,
+    ax.plot(thresholds, nb_r, color=C_BE_R, lw=1.6,
             label="BE recalibrated")
-    ax.plot(thresholds, nb_all, color=colors_be, lw=1.0, ls=":",
-            alpha=0.7, label="BE treat-all")
+    ax.plot(thresholds, nb_all, color=C_BE_TA, lw=0.9, ls=":",
+            label="BE treat-all")
 
 if hco3_data is not None:
     y, p = hco3_data
@@ -305,16 +351,70 @@ if hco3_data is not None:
     nb_r = np.array([net_benefit(y, p_r, pt) for pt in thresholds])
     prev = y.mean(); prev_max = max(prev_max, prev)
     nb_all = prev - (1 - prev) * (thresholds / (1 - thresholds))
-    ax.plot(thresholds, nb_o, color=colors_h, lw=1.6, ls="--",
-            label="HCO3- original")
-    ax.plot(thresholds, nb_r, color=colors_h, lw=2.2,
-            label="HCO3- recalibrated")
-    ax.plot(thresholds, nb_all, color=colors_h, lw=1.0, ls=":",
-            alpha=0.7, label="HCO3- treat-all")
+    ax.plot(thresholds, nb_o, color=C_H_O, lw=1.1, ls="--",
+            label=f"{HCO3_LABEL} original")
+    ax.plot(thresholds, nb_r, color=C_H_R, lw=1.6,
+            label=f"{HCO3_LABEL} recalibrated")
+    ax.plot(thresholds, nb_all, color=C_H_TA, lw=0.9, ls=":",
+            label=f"{HCO3_LABEL} treat-all")
 
+ax.axhline(0, color="#444444", lw=0.8, ls=":", alpha=0.7)
+ax.axvspan(0.10, 0.30, color="#FFF3B0", alpha=0.35, zorder=0)
+
+ax.set_xlim([0, 0.5])
+ylim_top = max(0.25, prev_max * 1.35)
+ax.set_ylim([-0.05, ylim_top])
+ax.set_xticks([0, 0.1, 0.2, 0.3, 0.4, 0.5])
+
+ax.set_xlabel("Threshold probability")
+ax.set_ylabel("Net benefit")
+
+ax.grid(True, alpha=0.25)
+
+# ★ v3.1：en dash → hyphen
+ax.text(0.20, ylim_top * 0.96, "Clinical range 10-30%",
+        ha="center", va="top", fontsize=8.5,
+        color="#666666", style="italic")
+
+ax.legend(loc="center left", bbox_to_anchor=(1.02, 0.5),
+          frameon=True, framealpha=0.95,
+          edgecolor="#CCCCCC", fontsize=8.5,
+          ncol=1, borderpad=0.6)
+
+plt.tight_layout()
+out_fig3_chest = os.path.join(FIG_DIR_CHEST, "Figure3_DCA.pdf")
+plt.savefig(out_fig3_chest, dpi=1200, bbox_inches="tight")
+plt.close()
+print(f"  已保存 (CHEST style): {out_fig3_chest}")
+
+# 旧版兼容（figures/Fig3_DCA_dual.pdf）
+fig, ax = plt.subplots(figsize=(9, 6))
+if be_data is not None:
+    y, p = be_data
+    logit_p = to_logit(p)
+    a, b = calib_slope_intercept(y, logit_p)
+    p_r = 1.0 / (1.0 + np.exp(-(a * logit_p + b)))
+    nb_o = np.array([net_benefit(y, p, pt) for pt in thresholds])
+    nb_r = np.array([net_benefit(y, p_r, pt) for pt in thresholds])
+    prev = y.mean()
+    nb_all = prev - (1 - prev) * (thresholds / (1 - thresholds))
+    ax.plot(thresholds, nb_o, color="steelblue", lw=1.6, ls="--", label="BE original")
+    ax.plot(thresholds, nb_r, color="steelblue", lw=2.2, label="BE recalibrated")
+    ax.plot(thresholds, nb_all, color="steelblue", lw=1.0, ls=":", alpha=0.7, label="BE treat-all")
+if hco3_data is not None:
+    y, p = hco3_data
+    logit_p = to_logit(p)
+    a, b = calib_slope_intercept(y, logit_p)
+    p_r = 1.0 / (1.0 + np.exp(-(a * logit_p + b)))
+    nb_o = np.array([net_benefit(y, p, pt) for pt in thresholds])
+    nb_r = np.array([net_benefit(y, p_r, pt) for pt in thresholds])
+    prev = y.mean()
+    nb_all = prev - (1 - prev) * (thresholds / (1 - thresholds))
+    ax.plot(thresholds, nb_o, color="firebrick", lw=1.6, ls="--", label="HCO3- original")
+    ax.plot(thresholds, nb_r, color="firebrick", lw=2.2, label="HCO3- recalibrated")
+    ax.plot(thresholds, nb_all, color="firebrick", lw=1.0, ls=":", alpha=0.7, label="HCO3- treat-all")
 ax.axhline(0, color="black", lw=1.0, ls=":", alpha=0.6)
-ax.axvspan(0.10, 0.30, color="lightyellow", alpha=0.45, zorder=0,
-           label="Clinical range 10-30%")
+ax.axvspan(0.10, 0.30, color="lightyellow", alpha=0.45, zorder=0, label="Clinical range 10-30%")
 ax.set_xlim([0, 0.5])
 ax.set_ylim([-0.05, max(0.3, prev_max * 1.4)])
 ax.set_xlabel("Threshold probability", fontsize=12)
@@ -326,18 +426,91 @@ plt.tight_layout()
 plt.savefig(os.path.join(FIGURES_DIR, "Fig3_DCA_dual.pdf"),
             dpi=300, bbox_inches="tight")
 plt.close()
-print(f"\n  已保存: figures/Fig3_DCA_dual.pdf")
+print(f"  已保存 (旧版兼容): figures/Fig3_DCA_dual.pdf")
 
-# -------- 4c. FigS3 双版本重校准前后校准曲线 --------
+# ============================================================
+# 4c. Figure S4: Recalibration curves — CHEST 风格
+# ============================================================
+print("\n  画 Figure S4 (Recalibration curves, CHEST style) ...")
+
+fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.4))
+
+# 面板 A: BE
+ax = axes[0]
+if be_data is not None:
+    y, p = be_data
+    logit_p = to_logit(p)
+    a, b = calib_slope_intercept(y, logit_p)
+    p_r = 1.0 / (1.0 + np.exp(-(a * logit_p + b)))
+    sl0, ic0 = calib_slope_intercept(y, logit_p)
+    slr, icr = calib_slope_intercept(y, to_logit(p_r))
+    fo, mo = calibration_curve(y, p,   n_bins=10, strategy="quantile")
+    fr, mr = calibration_curve(y, p_r, n_bins=10, strategy="quantile")
+    ax.plot([0, 1], [0, 1], color="#777777", lw=0.9, ls="--", label="Ideal")
+    ax.plot(mo, fo, "o--", color=C_BE_O, lw=1.1, markersize=4.5,
+            label=f"Original (slope {sl0:.2f}; intercept {ic0:.2f})")
+    ax.plot(mr, fr, "s-",  color=C_BE_R, lw=1.6, markersize=5,
+            label=f"Recalibrated (slope {slr:.2f}; intercept {icr:.2f})")
+    ax.set_xlim([0, 0.4]); ax.set_ylim([0, 0.4])
+    ax.set_xticks([0, 0.1, 0.2, 0.3, 0.4])
+    ax.set_yticks([0, 0.1, 0.2, 0.3, 0.4])
+    ax.set_xlabel("Predicted probability")
+    ax.set_ylabel("Observed probability")
+    ax.grid(True, alpha=0.25)
+    ax.legend(loc="upper right", frameon=True, framealpha=0.95,
+              edgecolor="#CCCCCC", fontsize=7.5, borderpad=0.5)
+else:
+    ax.text(0.5, 0.5, "BE: no data", ha="center", va="center")
+    ax.set_axis_off()
+
+ax.text(-0.16, 1.03, "A", transform=ax.transAxes,
+        fontsize=12, fontweight="bold", va="bottom", ha="left")
+
+# 面板 B: HCO3-
+ax = axes[1]
+if hco3_data is not None:
+    y, p = hco3_data
+    logit_p = to_logit(p)
+    a, b = calib_slope_intercept(y, logit_p)
+    p_r = 1.0 / (1.0 + np.exp(-(a * logit_p + b)))
+    sl0, ic0 = calib_slope_intercept(y, logit_p)
+    slr, icr = calib_slope_intercept(y, to_logit(p_r))
+    fo, mo = calibration_curve(y, p,   n_bins=10, strategy="quantile")
+    fr, mr = calibration_curve(y, p_r, n_bins=10, strategy="quantile")
+    ax.plot([0, 1], [0, 1], color="#777777", lw=0.9, ls="--", label="Ideal")
+    ax.plot(mo, fo, "o--", color=C_H_O, lw=1.1, markersize=4.5,
+            label=f"Original (slope {sl0:.2f}; intercept {ic0:.2f})")
+    ax.plot(mr, fr, "s-",  color=C_H_R, lw=1.6, markersize=5,
+            label=f"Recalibrated (slope {slr:.2f}; intercept {icr:.2f})")
+    ax.set_xlim([0, 0.45]); ax.set_ylim([0, 0.45])
+    ax.set_xticks([0, 0.1, 0.2, 0.3, 0.4])
+    ax.set_yticks([0, 0.1, 0.2, 0.3, 0.4])
+    ax.set_xlabel("Predicted probability")
+    ax.set_ylabel("Observed probability")
+    ax.grid(True, alpha=0.25)
+    ax.legend(loc="upper right", frameon=True, framealpha=0.95,
+              edgecolor="#CCCCCC", fontsize=7.5, borderpad=0.5)
+else:
+    ax.text(0.5, 0.5, "HCO$_3^-$: no data", ha="center", va="center")
+    ax.set_axis_off()
+
+ax.text(-0.16, 1.03, "B", transform=ax.transAxes,
+        fontsize=12, fontweight="bold", va="bottom", ha="left")
+
+plt.tight_layout()
+out_figs4_chest = os.path.join(FIG_DIR_CHEST, "FigureS4_recalibration.pdf")
+plt.savefig(out_figs4_chest, dpi=1200, bbox_inches="tight")
+plt.close()
+print(f"  已保存 (CHEST style): {out_figs4_chest}")
+
+# 旧版兼容（figures/FigS3_recalibration_dual.pdf）
 fig, axes = plt.subplots(1, 2, figsize=(13, 6))
-
 for ax, data, label, color in [
     (axes[0], be_data,   "BE (n=434)",    "steelblue"),
     (axes[1], hco3_data, "HCO3- (n=684)", "firebrick"),
 ]:
     if data is None:
-        ax.text(0.5, 0.5, f"{label}: no data",
-                ha="center", va="center", fontsize=12)
+        ax.text(0.5, 0.5, f"{label}: no data", ha="center", va="center", fontsize=12)
         ax.set_axis_off()
         continue
     y, p = data
@@ -359,12 +532,11 @@ for ax, data, label, color in [
     ax.set_title(label, fontsize=13)
     ax.legend(loc="lower right", fontsize=9, frameon=True)
     ax.grid(alpha=0.3)
-
 plt.tight_layout()
 plt.savefig(os.path.join(FIGURES_DIR, "FigS3_recalibration_dual.pdf"),
             dpi=300, bbox_inches="tight")
 plt.close()
-print(f"  已保存: figures/FigS3_recalibration_dual.pdf")
+print(f"  已保存 (旧版兼容): figures/FigS3_recalibration_dual.pdf")
 
 print("\n" + "=" * 70)
 print("完成！输出文件：")
@@ -373,6 +545,8 @@ print("  results/recal_bootstrap_HCO3.csv")
 print("  results/recal_bootstrap_summary.csv")
 print("  results/recal_summary_dual.csv")
 print("  results/dca_results_dual.csv")
-print("  figures/Fig3_DCA_dual.pdf")
-print("  figures/FigS3_recalibration_dual.pdf")
+print("  figures/Fig3_DCA_dual.pdf              (旧版兼容)")
+print("  figures/FigS3_recalibration_dual.pdf   (旧版兼容)")
+print("  论文图/Figure3_DCA.pdf                 (CHEST 风格)")
+print("  论文图/FigureS4_recalibration.pdf      (CHEST 风格)")
 print("=" * 70)
