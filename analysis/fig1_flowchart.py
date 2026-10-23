@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Fig 1: 样本筛选流程图（CHEST style v3）
-- 左右栏统一浅灰蓝配色，加 A/B 面板标签
-- ★ v3：右栏 Box 2 从 "(see Methods)" 改为列出 4 条 inclusion criteria
-- 输出到 论文图/Figure1_flowchart.pdf
+Figure 1: 样本筛选流程图 (最终定稿版 v17)
+- 修复左侧排除框文本出框问题（换行处理，不增加框宽）
 """
 import os
 import sys
@@ -18,163 +16,184 @@ FIG_DIR_CHEST = os.path.join(BASE, "论文图")
 os.makedirs(FIGURES_DIR, exist_ok=True)
 os.makedirs(FIG_DIR_CHEST, exist_ok=True)
 
-# ---- CHEST style ----
 sys.path.insert(0, BASE)
 try:
     from chest_style import apply_style
     apply_style()
-    print("[style] chest_style applied")
-except Exception as _e:
-    print(f"[style] 未找到 chest_style，使用默认: {_e}")
+except Exception:
+    pass
 
-COLOR_BOX       = "#E8F0F8"
-COLOR_BOX_EMPH  = "#D6E4F0"
-COLOR_BOX_TITLE = "#FFFFFF"
+COLOR_BOX       = "#FFFFFF"
+COLOR_BOX_EXCL  = "#F5F5F5"
+COLOR_BOX_EMPH  = "#E8F0F8"
 COLOR_BORDER    = "#333333"
-COLOR_ARROW     = "#4A6FA5"
-COLOR_TEXT      = "#222222"
+COLOR_ARROW     = "#555555"
+COLOR_TEXT      = "#111111"
 
-def draw_box(ax, x, y, w, h, text, face=COLOR_BOX,
-             fontsize=11, bold=False, edge=COLOR_BORDER, lw=1.0):
+def draw_box(ax, x, y, w, h, text, face=COLOR_BOX, align="center",
+             fontsize=10.5, bold=False, edge=COLOR_BORDER, lw=1.0):
     box = FancyBboxPatch(
         (x, y), w, h,
-        boxstyle="round,pad=0.04,rounding_size=0.12",
+        boxstyle="round,pad=0.02,rounding_size=0.1",
         linewidth=lw, edgecolor=edge, facecolor=face)
     ax.add_patch(box)
-    ax.text(x + w / 2, y + h / 2, text,
-            ha="center", va="center",
+    ha = "center" if align == "center" else "left"
+    tx = x + w / 2 if align == "center" else x + 0.15
+    ty = y + h / 2
+    ax.text(tx, ty, text, ha=ha, va="center",
             fontsize=fontsize, color=COLOR_TEXT,
-            fontweight="bold" if bold else "normal")
+            fontweight="bold" if bold else "normal",
+            linespacing=1.4)  # 增加一点行距让换行更舒展
 
-def draw_arrow(ax, x1, y1, x2, y2, color=COLOR_ARROW):
+def draw_arrow(ax, x1, y1, x2, y2, color=COLOR_ARROW, rad=0.0, lw=1.2):
     arrow = FancyArrowPatch(
         (x1, y1), (x2, y2),
-        arrowstyle="-|>", mutation_scale=14,
-        linewidth=1.1, color=color)
+        arrowstyle="-|>", mutation_scale=12,
+        linewidth=lw, color=color,
+        connectionstyle=f"arc3,rad={rad}")
     ax.add_patch(arrow)
 
 # ============================================================
 # 画布
 # ============================================================
-fig, ax = plt.subplots(figsize=(14, 10))
-ax.set_xlim(0, 14)
-ax.set_ylim(0, 11)
+fig, ax = plt.subplots(figsize=(16, 12))
+ax.set_xlim(0, 16)
+ax.set_ylim(0, 12)
 ax.axis("off")
 
-# A / B 面板标签
-ax.text(0.5, 10.75, "A", ha="left", va="top",
-        fontsize=14, fontweight="bold", color="black")
-ax.text(7.5, 10.75, "B", ha="left", va="top",
-        fontsize=14, fontweight="bold", color="black")
+# ============================================================
+# 栏 A：开发队列
+# ============================================================
+ax.text(0.2, 11.5, "A  Development cohort", fontsize=15, fontweight="bold")
+
+CX_A = 2.5
+BW_A = 3.2
+ys_A = [10.8, 7.2, 4.6] 
+
+draw_box(ax, CX_A - BW_A/2, ys_A[0], BW_A, 0.65, "Patients with J96 diagnosis\nn = 4,628", fontsize=11)
+draw_box(ax, CX_A - BW_A/2, ys_A[1], BW_A, 0.65, "Final development cohort\nn = 2,028", face=COLOR_BOX_EMPH, bold=True, fontsize=11)
+draw_box(ax, CX_A - BW_A/2, ys_A[2], BW_A, 0.65, "Random 7:3 split\n(seed = 123)", fontsize=11)
+
+draw_arrow(ax, CX_A, ys_A[0], CX_A, ys_A[1] + 0.65, lw=1.5)
+draw_arrow(ax, CX_A, ys_A[1], CX_A, ys_A[2] + 0.65, lw=1.5)
+
+# 底部 7:3 分叉
+y_split = 2.8
+sub_w = 1.4
+draw_box(ax, CX_A - 1.6, y_split, sub_w, 0.75, "Training\nn = 1,420\n154 deaths", face=COLOR_BOX_EMPH, fontsize=10)
+draw_box(ax, CX_A + 0.2, y_split, sub_w, 0.75, "Validation\nn = 608\n72 deaths", face=COLOR_BOX_EMPH, fontsize=10)
+draw_arrow(ax, CX_A, ys_A[2], CX_A - 0.9, y_split + 0.75, lw=1.2)
+draw_arrow(ax, CX_A, ys_A[2], CX_A + 0.9, y_split + 0.75, lw=1.2)
+
+# 右侧排除框 
+ex_A_x = 4.5
+ex_A_w = 3.0
+ex_text_A = (
+    "Excluded (n = 2,600):\n"
+    "1. Repeat admissions (n = 1,299)\n"
+    "2. No respiratory failure (n = 411)\n"
+    "3. Non-pulmonary primary\n   discharge diagnosis (n = 562)\n"
+    "4. Hospital stay < 24 h (n = 51)\n"
+    "5. Death < 24 h (n = 38)\n"
+    "6. Missing >30% labs (n = 197)\n"
+    "7. Unknown death status (n = 42)"
+)
+draw_box(ax, ex_A_x, 7.6, ex_A_w, 2.8, ex_text_A, face=COLOR_BOX_EXCL, align="left", fontsize=9.5)
+draw_arrow(ax, CX_A + 0.05, 9.0, ex_A_x - 0.05, 9.0, rad=0.0, lw=1.2)
+
 
 # ============================================================
-# 左栏 A: Development cohort
+# 栏 B1：MIMIC-IV
 # ============================================================
-BW = 5.0
-BH = 0.8
-LX = 1.0
-CX = LX + BW / 2
-ys = [9.2, 7.9, 6.6, 5.3, 3.5]
+ax.text(9.0, 11.5, "B1  MIMIC-IV v3.1 (single-center)", fontsize=15, fontweight="bold", color="#2F5597")
 
-draw_box(ax, LX, ys[0], BW, BH,
-         "Adults with J96 diagnosis (ICD-10)\nn = 15,749", face=COLOR_BOX)
+CX_B1 = 10.5
+BW_B1 = 3.4
+ys_B1 = [10.8, 8.8]
 
-draw_box(ax, LX, ys[1], BW, BH,
-         "+ Pulmonary disease as primary\nreason for admission (J-chapter)\nn = 2,559",
-         face=COLOR_BOX)
+draw_box(ax, CX_B1 - BW_B1/2, ys_B1[0], BW_B1, 0.65, "Patients with J96 diagnosis (ICD-10)\nn = 20,780", fontsize=11)
+draw_box(ax, CX_B1 - BW_B1/2, ys_B1[1], BW_B1, 0.65, "Final MIMIC-IV cohort\nn = 2,456", face=COLOR_BOX_EMPH, bold=True, fontsize=11)
 
-draw_box(ax, LX, ys[2], BW, BH,
-         "+ Age ≥18, hospital stay ≥24 h,\nsurvived first 24 h\nn = 2,456",
-         face=COLOR_BOX)
+draw_arrow(ax, CX_B1, ys_B1[0], CX_B1, ys_B1[1] + 0.65, lw=1.5)
 
-draw_box(ax, LX, ys[3], BW, BH,
-         "+ Arterial blood gas analysis\nwithin 24 h of admission\nn = 2,028",
-         face=COLOR_BOX_EMPH, bold=True)
+# 右侧排除框
+ex_B1_x = CX_B1 + BW_B1/2 + 0.4
+ex_B1_w = 2.6
+ex_text_B1 = (
+    "Excluded (n = 18,324):\n"
+    "- Age < 18 or stay < 24 h\n"
+    "- Repeat admissions\n"
+    "- Death < 24 h\n"
+    "- Other screening rules"
+)
+draw_box(ax, ex_B1_x, 9.4, ex_B1_w, 1.3, ex_text_B1, face=COLOR_BOX_EXCL, align="left", fontsize=9.5)
+draw_arrow(ax, CX_B1 + 0.05, 10.0, ex_B1_x - 0.05, 10.0, rad=0.0, lw=1.2)
 
-draw_box(ax, LX, ys[4], BW, 0.6,
-         "Random 7:3 split (seed = 123)",
-         face=COLOR_BOX_TITLE, fontsize=11)
+# 底部 BE / HCO3 分叉
+y_branch_B1 = 6.8
+sub_w_B1 = 1.6
+draw_box(ax, CX_B1 - 1.7, y_branch_B1, sub_w_B1, 0.8, "BE model\nn = 434 (88 deaths)", face=COLOR_BOX_EMPH, fontsize=10)
+draw_box(ax, CX_B1 + 0.1, y_branch_B1, sub_w_B1, 0.8, "HCO$_3^-$ model\nn = 684 (109 deaths)", face=COLOR_BOX_EMPH, fontsize=10)
 
-sub_w = BW / 2 - 0.1
-draw_box(ax, LX, ys[4] - 1.4, sub_w, BH,
-         "Training subset\nn = 1,421\n159 deaths", face=COLOR_BOX_EMPH)
-draw_box(ax, LX + BW / 2 + 0.1, ys[4] - 1.4, sub_w, BH,
-         "Internal validation\nn = 607\n67 deaths", face=COLOR_BOX_EMPH)
+draw_arrow(ax, CX_B1, ys_B1[1], CX_B1 - 0.9, y_branch_B1 + 0.8, lw=1.2)
+draw_arrow(ax, CX_B1, ys_B1[1], CX_B1 + 0.9, y_branch_B1 + 0.8, lw=1.2)
 
-for i in range(4):
-    draw_arrow(ax, CX, ys[i], CX, ys[i + 1] + BH)
-draw_arrow(ax, CX, ys[4], LX + sub_w / 2, ys[4] - 1.4 + BH)
-draw_arrow(ax, CX, ys[4], LX + BW / 2 + 0.1 + sub_w / 2, ys[4] - 1.4 + BH)
+# 侧边小字
+ax.text(CX_B1 - 1.8, 7.9, "Excl. missing\npredictors\n(n = 2,022)", ha="right", va="center", fontsize=9.5, color="#555555")
+ax.text(CX_B1 + 1.8, 7.9, "Excl. missing\npredictors\n(n = 1,772)", ha="left", va="center", fontsize=9.5, color="#555555")
 
-# ============================================================
-# 右栏 B: External validation (MIMIC-IV)
-# ★ v3：Box 2 加 4 条 inclusion criteria，框高 1.0，字号 10.5
-# ============================================================
-RX = 8.0
-RCX = RX + BW / 2
-
-# 重新定义右栏 ys（因为 Box 2 变高，需微调）
-ys_B = [9.2, 7.9, 6.5, 5.1, 3.3]     # ★ 调整 B 栏 y 坐标
-BH_B = 0.9                            # ★ B 栏统一框高（原 0.8）
-
-draw_box(ax, RX, ys_B[0], BW, BH_B,
-         "Adults with J96 diagnosis (ICD-10)\nin MIMIC-IV v3.1\nn = 20,780",
-         face=COLOR_BOX)
-
-# ★ Box 2：4 条 criteria（本框加高到 1.1）
-draw_box(ax, RX, ys_B[1] - 0.1, BW, 1.1,
-         "+ Inclusion criteria applied:\n"
-         "Age ≥18 y; hospital stay ≥24 h;\n"
-         "survived first 24 h; first admission\n"
-         "n = 2,456",
-         face=COLOR_BOX, fontsize=10.5)
-
-draw_box(ax, RX, ys_B[2], BW, BH_B,
-         "Final MIMIC-IV cohort\nn = 2,456",
-         face=COLOR_BOX_EMPH, bold=True)
-
-draw_box(ax, RX, ys_B[3], BW, BH_B,
-         "Complete cases for ALB, BUN, BE\nwithin 24 h of admission\nn = 434 (88 deaths)",
-         face=COLOR_BOX_EMPH, bold=True)
-
-draw_box(ax, RX, ys_B[4], BW, 0.6,
-         "Sensitivity analysis",
-         face=COLOR_BOX_TITLE, fontsize=11)
-
-draw_box(ax, RX, ys_B[4] - 1.4, BW, BH_B,
-         "Complete cases for ALB, BUN, HCO$_3^-$\nn = 684 (109 deaths)",
-         face=COLOR_BOX)
-
-# 箭头（B 栏，注意 Box 2 变高）
-draw_arrow(ax, RCX, ys_B[0], RCX, ys_B[1] - 0.1 + 1.1)              # Box1 → Box2(加高)
-draw_arrow(ax, RCX, ys_B[1] - 0.1, RCX, ys_B[2] + BH_B)             # Box2(顶) → Box3
-draw_arrow(ax, RCX, ys_B[2], RCX, ys_B[3] + BH_B)
-draw_arrow(ax, RCX, ys_B[3], RCX, ys_B[4] + 0.6)
-draw_arrow(ax, RCX, ys_B[4], RCX, ys_B[4] - 1.4 + BH_B)
 
 # ============================================================
-# 缩写注释 + 分隔线
+# 栏 B2：eICU-CRD
 # ============================================================
-ax.text(0.5, 1.0,
-        "ABG = arterial blood gas; ALB = albumin; BUN = blood urea nitrogen;\n"
-        "BE = base excess; HCO$_3^-$ = bicarbonate.",
-        ha="left", va="center", fontsize=9, style="italic", color="#555555")
+ax.text(9.0, 5.6, "B2  eICU-CRD v2.0 (multicenter)", fontsize=15, fontweight="bold", color="#2F5597")
 
-ax.plot([7.0, 7.0], [1.5, 10.5], color="#CCCCCC", linewidth=0.8, linestyle=":")
+CX_B2 = 10.5
+BW_B2 = 3.4
+ys_B2 = [4.8, 2.8]
+
+draw_box(ax, CX_B2 - BW_B2/2, ys_B2[0], BW_B2, 0.65, "ICU stays with ICD-9 518.81\nn = 200,859", fontsize=11)
+draw_box(ax, CX_B2 - BW_B2/2, ys_B2[1], BW_B2, 0.65, "Final eICU-CRD cohort\nn = 5,094 (1,010 deaths)", face=COLOR_BOX_EMPH, bold=True, fontsize=11)
+
+draw_arrow(ax, CX_B2, ys_B2[0], CX_B2, ys_B2[1] + 0.65, lw=1.5)
+
+# 右侧排除框
+ex_B2_x = CX_B2 + BW_B2/2 + 0.4
+ex_B2_w = 2.6
+ex_text_B2 = (
+    "Excluded (n = 195,765):\n"
+    "- Age < 18 or stay < 24 h\n"
+    "- Repeat admissions\n"
+    "- Death < 24 h\n"
+    "- Out-of-range labs (n = 5)\n"
+    "- Other screening rules"
+)
+draw_box(ax, ex_B2_x, 3.4, ex_B2_w, 1.4, ex_text_B2, face=COLOR_BOX_EXCL, align="left", fontsize=9.5)
+draw_arrow(ax, CX_B2 + 0.05, 4.1, ex_B2_x - 0.05, 4.1, rad=0.0, lw=1.2)
+
+# 底部 BE / HCO3 分叉
+y_branch_B2 = 0.8
+sub_w_B2 = 1.6
+draw_box(ax, CX_B2 - 1.7, y_branch_B2, sub_w_B2, 0.8, "BE model\nn = 1,505 (368 deaths)", face=COLOR_BOX_EMPH, fontsize=10)
+draw_box(ax, CX_B2 + 0.1, y_branch_B2, sub_w_B2, 0.8, "HCO$_3^-$ model\nn = 2,434 (531 deaths)", face=COLOR_BOX_EMPH, fontsize=10)
+
+draw_arrow(ax, CX_B2, ys_B2[1], CX_B2 - 0.9, y_branch_B2 + 0.8, lw=1.2)
+draw_arrow(ax, CX_B2, ys_B2[1], CX_B2 + 0.9, y_branch_B2 + 0.8, lw=1.2)
+
+ax.text(CX_B2 - 1.8, 1.9, "Excl. missing\npredictors\n(n = 3,589)", ha="right", va="center", fontsize=9.5, color="#555555")
+ax.text(CX_B2 + 1.8, 1.9, "Excl. missing\npredictors\n(n = 2,660)", ha="left", va="center", fontsize=9.5, color="#555555")
+
+# ============================================================
+# 底部说明 & 保存
+# ============================================================
+ax.text(0.2, 0.1, "ALB = albumin; BUN = blood urea nitrogen; BE = base excess; HCO$_3^-$ = bicarbonate.",
+        ha="left", va="center", fontsize=10, style="italic", color="#666666")
 
 plt.tight_layout()
-
-# ============================================================
-# 保存
-# ============================================================
 out_chest = os.path.join(FIG_DIR_CHEST, "Figure1_flowchart.pdf")
 plt.savefig(out_chest, dpi=1200, bbox_inches="tight")
-
 out_old = os.path.join(FIGURES_DIR, "Fig1_flowchart.pdf")
 plt.savefig(out_old, dpi=300, bbox_inches="tight")
-
 plt.close()
 
-print(f"\n✅ 已保存:")
-print(f"   {out_chest}      (CHEST style)")
-print(f"   {out_old}        (旧版兼容)")
+print(f"✅ 已保存: {out_chest}")

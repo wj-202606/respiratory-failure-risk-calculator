@@ -1,0 +1,8 @@
+Variable,"Development (n = 2,028)","eICU-CRD BE (n = 1,505)",SMD (BE),"eICU-CRD HCO3 (n = 2,434)",SMD (HCO3)
+"Age, years, mean (SD)",76.0 (12.0),64.1 (16.1),0.86,64.3 (16.2),0.81
+"Male, %",71.1,52.7,0.39,51.3,0.42
+"ALB, g/L, mean (SD)",34.4 (5.3),27.6 (6.5),1.18,27.4 (6.5),1.18
+"BUN, mmol/L, mean (SD)",8.7 (6.3),11.4 (8.2),0.36,11.2 (8.2),0.34
+"BE, mmol/L, mean (SD)",4.2 (7.8),-0.2 (7.3),0.58,—,—
+"HCO3, mmol/L, mean (SD)",—,—,—,25.0 (6.2),—
+"In-hospital mortality, %",11.1,24.5,0.35,21.8,0.29

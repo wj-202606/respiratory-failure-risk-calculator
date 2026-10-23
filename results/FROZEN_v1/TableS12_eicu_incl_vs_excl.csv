@@ -1,0 +1,9 @@
+Version,Variable,Included,Excluded,SMD,P value
+BE,"Age, years, mean (SD)",64.1 (16.1),65.9 (16.0),0.11,0.000
+BE,"Male, n (%)",792 (52.7),1737 (48.4),0.09,0.006
+BE,"BUN, mmol/L, mean (SD)",11.4 (8.2),10.3 (7.4),0.14,0.000
+BE,"In-hospital mortality, n (%)",368 (24.5),642 (17.9),0.16,0.000
+HCO3,"Age, years, mean (SD)",64.3 (16.2),66.4 (15.8),0.13,0.000
+HCO3,"Male, n (%)",1248 (51.3),1281 (48.2),0.06,0.028
+HCO3,"BUN, mmol/L, mean (SD)",11.2 (8.2),10.0 (7.1),0.17,0.000
+HCO3,"In-hospital mortality, n (%)",531 (21.8),479 (18.0),0.10,0.001

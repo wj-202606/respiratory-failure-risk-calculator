@@ -1,0 +1,2 @@
+Version,Stage,n,events,AUC,AUC_lo,AUC_hi,Brier,Brier_lo,Brier_hi,cal_slope,cal_intercept,recal_a,recal_b,Brier_recal,slope_recal,intercept_recal,OOB_Brier_median,OOB_slope_median,OOB_intercept_median
+HCO3,Original,2434,531,0.676354,0.649241,0.702037,0.165259,0.156804,0.173694,0.641970,-0.612644,0.641970,-0.612644,0.158303,0.999800,-0.000195,0.158577,1.004056,-0.002009

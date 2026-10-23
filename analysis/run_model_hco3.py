@@ -42,7 +42,7 @@ from scipy import stats
 # ============================================================
 # 0. 路径设置
 # ============================================================
-BASE = os.environ.get("PROJECT_BASE", os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+BASE = r"C:\Users\24339\Desktop\6.30呼吸衰竭\6.30呼衰\1.R数据预处理+变量筛选9.21"
 RESULTS_DIR = os.path.join(BASE, "results")
 FIGURES_DIR = os.path.join(BASE, "figures")
 os.makedirs(RESULTS_DIR, exist_ok=True)
@@ -50,7 +50,7 @@ os.makedirs(FIGURES_DIR, exist_ok=True)
 
 TRAIN_CSV = os.path.join(RESULTS_DIR, "traindata.csv")
 VAL_CSV   = os.path.join(RESULTS_DIR, "valdata.csv")
-MIMIC_CSV = os.environ.get("MIMIC_WIDE_HCO3_CSV", r"D:\mimic_wide_hco3.csv")   # HCO3- version
+MIMIC_CSV = r"D:\mimic_wide_hco3.csv"   # [HCO3-改动] 原为 D:\mimic_wide.csv
 
 RNG = 123
 FEATURES = ["ALB", "BUN", "BE"]

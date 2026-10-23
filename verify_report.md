@@ -1,0 +1,113 @@
+# verify_frozen 报告
+
+冻结目录：C:\Users\24339\Desktop\respiratory-failure-risk-calculator\results\FROZEN_v1
+
+总键数：96
+
+一致：96
+
+不一致：0
+
+文件缺失/无法重算：0
+
+
+## 逐项结果
+
+| Key | Expected | Recomputed | Status | Source |
+|---|---|---|---|---|
+| intval_100split_median | 0.766 | 0.7664 | 一致 | auc_100splits.csv (median) |
+| mimic_hco3_n | 684.0 | 684.0000 | 一致 | external_hco3_sensitivity_v2.csv |
+| mimic_hco3_events | 109.0 | 109.0000 | 一致 | external_hco3_sensitivity_v2.csv |
+| mimic_hco3_auc | 0.642 | 0.6422 | 一致 | external_hco3_sensitivity_v2.csv |
+| mimic_hco3_auc_lo | 0.588 | 0.5885 | 一致 | external_hco3_sensitivity_v2.csv |
+| mimic_hco3_auc_hi | 0.697 | 0.6966 | 一致 | external_hco3_sensitivity_v2.csv |
+| mimic_hco3_brier | 0.137 | 0.1368 | 一致 | external_hco3_sensitivity_v2.csv |
+| mimic_hco3_brier_lo | 0.119 | 0.1192 | 一致 | external_hco3_sensitivity_v2.csv |
+| mimic_hco3_brier_hi | 0.156 | 0.1559 | 一致 | external_hco3_sensitivity_v2.csv |
+| mimic_hco3_slope | 0.486 | 0.4856 | 一致 | external_hco3_sensitivity_v2.csv |
+| mimic_hco3_slope_lo | 0.294 | 0.2945 | 一致 | external_hco3_sensitivity_v2.csv |
+| mimic_hco3_slope_hi | 0.709 | 0.7087 | 一致 | external_hco3_sensitivity_v2.csv |
+| mimic_hco3_intercept | -0.809 | -0.8090 | 一致 | external_hco3_sensitivity_v2.csv |
+| mimic_hco3_intercept_lo | -1.213 | -1.2135 | 一致 | external_hco3_sensitivity_v2.csv |
+| mimic_hco3_intercept_hi | -0.4 | -0.3999 | 一致 | external_hco3_sensitivity_v2.csv |
+| mimic_hco3_recal_a | 0.4856 | 0.4856 | 一致 | external_hco3_sensitivity_v2.csv |
+| mimic_hco3_recal_b | -0.809 | -0.8090 | 一致 | external_hco3_sensitivity_v2.csv |
+| mimic_hco3_brier_recal | 0.131 | 0.1307 | 一致 | external_hco3_sensitivity_v2.csv |
+| mimic_hco3_brier_change_pct | -4.5 | -4.4970 | 一致 | external_hco3_sensitivity_v2.csv |
+| mimic_hco3_oob_brier | 0.131 | 0.1310 | 一致 | external_hco3_sensitivity_v2.csv |
+| mimic_hco3_oob_slope | 1.0275 | 1.0275 | 一致 | recal_bootstrap_summary_v2.csv (HCO3 median) |
+| mimic_hco3_oob_intercept | 0.0329 | 0.0329 | 一致 | recal_bootstrap_summary_v2.csv (HCO3 median) |
+| mimic_oob_brier | 0.159 | 0.1593 | 一致 | recal_bootstrap_summary_v2.csv (BE median) |
+| mimic_oob_slope | 1.003 | 1.0027 | 一致 | recal_bootstrap_summary_v2.csv (BE median) |
+| mimic_oob_intercept | -0.03 | -0.0302 | 一致 | recal_bootstrap_summary_v2.csv (BE median) |
+| mimic_oob_brier_median | 0.1593 | 0.1593 | 一致 | recal_bootstrap_summary_v2.csv |
+| mimic_oob_brier_q25 | 0.1492 | 0.1492 | 一致 | recal_bootstrap_summary_v2.csv |
+| mimic_oob_brier_q75 | 0.1694 | 0.1694 | 一致 | recal_bootstrap_summary_v2.csv |
+| mimic_oob_slope_median | 1.0027 | 1.0027 | 一致 | recal_bootstrap_summary_v2.csv |
+| mimic_oob_slope_q25 | 0.6203 | 0.6203 | 一致 | recal_bootstrap_summary_v2.csv |
+| mimic_oob_slope_q75 | 1.5554 | 1.5554 | 一致 | recal_bootstrap_summary_v2.csv |
+| mimic_oob_intercept_median | -0.0302 | -0.0302 | 一致 | recal_bootstrap_summary_v2.csv |
+| mimic_oob_intercept_q25 | -0.5243 | -0.5243 | 一致 | recal_bootstrap_summary_v2.csv |
+| mimic_oob_intercept_q75 | 0.7827 | 0.7827 | 一致 | recal_bootstrap_summary_v2.csv |
+| mimic_hco3_oob_brier_median | 0.1321 | 0.1321 | 一致 | recal_bootstrap_summary_v2.csv |
+| mimic_hco3_oob_brier_q25 | 0.124 | 0.1240 | 一致 | recal_bootstrap_summary_v2.csv |
+| mimic_hco3_oob_brier_q75 | 0.1402 | 0.1402 | 一致 | recal_bootstrap_summary_v2.csv |
+| mimic_hco3_oob_slope_median | 1.0275 | 1.0275 | 一致 | recal_bootstrap_summary_v2.csv |
+| mimic_hco3_oob_slope_q25 | 0.7399 | 0.7399 | 一致 | recal_bootstrap_summary_v2.csv |
+| mimic_hco3_oob_slope_q75 | 1.4017 | 1.4017 | 一致 | recal_bootstrap_summary_v2.csv |
+| mimic_hco3_oob_intercept_median | 0.0329 | 0.0329 | 一致 | recal_bootstrap_summary_v2.csv |
+| mimic_hco3_oob_intercept_q25 | -0.4308 | -0.4308 | 一致 | recal_bootstrap_summary_v2.csv |
+| mimic_hco3_oob_intercept_q75 | 0.6337 | 0.6337 | 一致 | recal_bootstrap_summary_v2.csv |
+| eicu_be_oob_brier_median | 0.171912 | 0.1719 | 一致 | recal_bootstrap_eicu_summary.csv |
+| eicu_be_oob_brier_q25 | 0.166962 | 0.1670 | 一致 | recal_bootstrap_eicu_summary.csv |
+| eicu_be_oob_brier_q75 | 0.176642 | 0.1766 | 一致 | recal_bootstrap_eicu_summary.csv |
+| eicu_be_oob_slope_median | 1.000885 | 1.0009 | 一致 | recal_bootstrap_eicu_summary.csv |
+| eicu_be_oob_slope_q25 | 0.846834 | 0.8468 | 一致 | recal_bootstrap_eicu_summary.csv |
+| eicu_be_oob_slope_q75 | 1.151568 | 1.1516 | 一致 | recal_bootstrap_eicu_summary.csv |
+| eicu_be_oob_intercept_median | -0.001034 | -0.0010 | 一致 | recal_bootstrap_eicu_summary.csv |
+| eicu_be_oob_intercept_q25 | -0.176739 | -0.1767 | 一致 | recal_bootstrap_eicu_summary.csv |
+| eicu_be_oob_intercept_q75 | 0.184719 | 0.1847 | 一致 | recal_bootstrap_eicu_summary.csv |
+| eicu_hco3_oob_brier_median | 0.158395 | 0.1584 | 一致 | recal_bootstrap_eicu_summary.csv |
+| eicu_hco3_oob_brier_q25 | 0.154985 | 0.1550 | 一致 | recal_bootstrap_eicu_summary.csv |
+| eicu_hco3_oob_brier_q75 | 0.162295 | 0.1623 | 一致 | recal_bootstrap_eicu_summary.csv |
+| eicu_hco3_oob_slope_median | 0.996253 | 0.9963 | 一致 | recal_bootstrap_eicu_summary.csv |
+| eicu_hco3_oob_slope_q25 | 0.875993 | 0.8760 | 一致 | recal_bootstrap_eicu_summary.csv |
+| eicu_hco3_oob_slope_q75 | 1.12993 | 1.1299 | 一致 | recal_bootstrap_eicu_summary.csv |
+| eicu_hco3_oob_intercept_median | -0.012556 | -0.0126 | 一致 | recal_bootstrap_eicu_summary.csv |
+| eicu_hco3_oob_intercept_q25 | -0.166171 | -0.1662 | 一致 | recal_bootstrap_eicu_summary.csv |
+| eicu_hco3_oob_intercept_q75 | 0.167044 | 0.1670 | 一致 | recal_bootstrap_eicu_summary.csv |
+| eicu_be_n | 1505.0 | 1505.0000 | 一致 | eicu_be_summary.csv |
+| eicu_be_events | 368.0 | 368.0000 | 一致 | eicu_be_summary.csv |
+| eicu_be_auc | 0.675 | 0.6750 | 一致 | eicu_be_summary.csv |
+| eicu_be_auc_lo | 0.642 | 0.6424 | 一致 | eicu_be_summary.csv |
+| eicu_be_auc_hi | 0.707 | 0.7069 | 一致 | eicu_be_summary.csv |
+| eicu_be_brier | 0.176 | 0.1759 | 一致 | eicu_be_summary.csv |
+| eicu_be_brier_lo | 0.165 | 0.1647 | 一致 | eicu_be_summary.csv |
+| eicu_be_brier_hi | 0.188 | 0.1876 | 一致 | eicu_be_summary.csv |
+| eicu_be_slope | 0.617 | 0.6171 | 一致 | eicu_be_summary.csv |
+| eicu_be_intercept | -0.484 | -0.4841 | 一致 | eicu_be_summary.csv |
+| eicu_be_brier_recal | 0.171 | 0.1709 | 一致 | eicu_be_summary.csv |
+| eicu_be_oob_brier | 0.171 | 0.1714 | 一致 | eicu_be_summary.csv |
+| eicu_be_oob_slope | 0.999 | 0.9987 | 一致 | eicu_be_summary.csv |
+| eicu_be_oob_intercept | 0.0 | -0.0001 | 一致 | eicu_be_summary.csv |
+| eicu_be_brier_change_pct | -2.8 | -2.8391 | 一致 | eicu_be_summary.csv (computed) |
+| eicu_hco3_n | 2434.0 | 2434.0000 | 一致 | eicu_hco3_summary.csv |
+| eicu_hco3_events | 531.0 | 531.0000 | 一致 | eicu_hco3_summary.csv |
+| eicu_hco3_auc | 0.676 | 0.6764 | 一致 | eicu_hco3_summary.csv |
+| eicu_hco3_auc_lo | 0.649 | 0.6492 | 一致 | eicu_hco3_summary.csv |
+| eicu_hco3_auc_hi | 0.702 | 0.7020 | 一致 | eicu_hco3_summary.csv |
+| eicu_hco3_brier | 0.165 | 0.1653 | 一致 | eicu_hco3_summary.csv |
+| eicu_hco3_brier_lo | 0.157 | 0.1568 | 一致 | eicu_hco3_summary.csv |
+| eicu_hco3_brier_hi | 0.174 | 0.1737 | 一致 | eicu_hco3_summary.csv |
+| eicu_hco3_slope | 0.642 | 0.6420 | 一致 | eicu_hco3_summary.csv |
+| eicu_hco3_intercept | -0.613 | -0.6126 | 一致 | eicu_hco3_summary.csv |
+| eicu_hco3_brier_recal | 0.158 | 0.1583 | 一致 | eicu_hco3_summary.csv |
+| eicu_hco3_oob_brier | 0.159 | 0.1586 | 一致 | eicu_hco3_summary.csv |
+| eicu_hco3_oob_slope | 1.004 | 1.0041 | 一致 | eicu_hco3_summary.csv |
+| eicu_hco3_oob_intercept | -0.002 | -0.0020 | 一致 | eicu_hco3_summary.csv |
+| eicu_hco3_brier_change_pct | -4.2 | -4.2092 | 一致 | eicu_hco3_summary.csv (computed) |
+| eicu_full_n | 5094.0 | 5094 | 一致 | eicu_full_cohort.csv |
+| eicu_cov_alb | 49.9 | 49.8626 | 一致 | eicu_full_cohort.csv |
+| eicu_cov_bun | 93.9 | 93.8751 | 一致 | eicu_full_cohort.csv |
+| eicu_cov_be | 55.2 | 55.1826 | 一致 | eicu_full_cohort.csv |
+| eicu_cov_hco3 | 91.0 | 90.9501 | 一致 | eicu_full_cohort.csv |

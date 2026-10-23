@@ -1,8 +1,12 @@
 # Data files (patient-level, do not upload)
-results/
 data/
-*.csv
 *.rds
+
+# Results: ignore generated CSVs at top level, but keep frozen inputs
+results/*
+!results/FROZEN_v1
+!results/FROZEN_v1/
+!results/FROZEN_v1/**
 
 # Python
 __pycache__/

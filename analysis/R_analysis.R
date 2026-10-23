@@ -1,25 +1,24 @@
 # ============================================================
-# R_analysis.R — development-cohort analysis pipeline (v4.0)
+# R_analysis.R — development-cohort analysis pipeline (v4.1)
 # Project: respiratory-failure-risk-calculator
 # Repo:    https://github.com/wj-202606/respiratory-failure-risk-calculator
 # Zenodo:  10.5281/zenodo.23300381 (concept) / 10.5281/zenodo.23354599 (v1.1.0)
 # Inputs:  respiratory.csv; Outputs: results/, figures/, 论文图/, imputed_data/
 #
-# v4.0 更新（本次，方案 A）：
-#   [1] ★ 内部验证流程修正：先 7:3 划分，再分别对训练集和验证集做多重插补
-#       消除 imputation leakage（原流程是先全数据插补再划分）
-#   [2] ★ 内部验证评估改为对 imp_val 的 50 套分别评估取平均
-#   [3] ★ 补齐 Brier/MAE 独立计算（rms::val.prob + naive）
-#   [4] ★ 补齐内部验证校准曲线（loess + CI 带）
-#   [5] ★ AUC_distribution 输出 CHEST 风格到 论文图/
-#   [6] HCO₃⁻ 版本系数单独输出，方便作为主分析使用
+# v4.1 更新（相对 v4.0，仅新增核对输出，不改既有分析逻辑）：
+#   [1] ★★★ 第 5.7 节：验证集缺失比例 + predictorMatrix Outcome 行列和核对
+#       输出 results/imp_val_check.csv
+#   [2] ★★★ 第 10.6 节：fit_lrm（首套）vs Rubin's rules 合并系数对比
+#       输出 results/coef_first_vs_pooled.csv
+#   [3] 第 13 节追加上述两项到 summary_for_manuscript 的补充输出
 #
-# 与 v3.2 的差异：
-#   - 第 5–6 节完全重写（先划分后插补）
-#   - 所有引用 imp 的地方改为 imp_train
-#   - 新增内部验证 50 套评估
-#   - 新增 Brier/MAE 独立计算
-#   - 新增内部验证校准曲线
+# v4.0 更新（保留）：
+#   [1] 内部验证流程修正：先 7:3 划分，再分别对训练集和验证集做多重插补
+#   [2] 内部验证评估改为对 imp_val 的 50 套分别评估取平均
+#   [3] 补齐 Brier/MAE 独立计算（rms::val.prob + naive）
+#   [4] 补齐内部验证校准曲线（loess + CI 带）
+#   [5] AUC_distribution 输出 CHEST 风格到 论文图/
+#   [6] HCO₃⁻ 版本系数单独输出，方便作为主分析使用
 # ============================================================
 
 ############################################################
@@ -225,6 +224,45 @@ for (i in 1:50) {
             row.names = FALSE)
 }
 cat("✅ 训练集 50 套插补数据已保存\n")
+
+# ============================================================
+# 5.7 ★★★ v4.1 新增：验证集缺失与 predictorMatrix 核对 ★★★
+# ============================================================
+cat("\n===== 5.7 验证集缺失与插补模型核对 =====\n")
+
+val_miss <- colMeans(is.na(raw_val[, c("ALB","BUN","BE","Outcome")]))
+val_complete <- mean(complete.cases(raw_val[, c("ALB","BUN","BE")]))
+val_n_missing <- sum(!complete.cases(raw_val[, c("ALB","BUN","BE")]))
+outcome_col_sum <- sum(imp_val$predictorMatrix[, "Outcome"])
+outcome_row_sum <- sum(imp_val$predictorMatrix["Outcome", ])
+
+cat("验证集 n =", nrow(raw_val), "\n")
+cat("验证集缺失比例：\n"); print(round(val_miss, 4))
+cat("三预测因子完整比例:", round(val_complete, 4), "\n")
+cat("至少缺一个的人数:", val_n_missing, "\n")
+cat("predictorMatrix Outcome 列和:", outcome_col_sum, "（应为 0）\n")
+cat("predictorMatrix Outcome 行和:", outcome_row_sum, "（应为 0）\n")
+cat("method[ALB/BUN/BE]:", paste(imp_val$method[c("ALB","BUN","BE")], collapse = ", "), "\n")
+cat("method[Outcome]:", ifelse("Outcome" %in% names(imp_val$method),
+                               imp_val$method["Outcome"], "NA"), "（应为空字符串）\n")
+
+imp_val_check <- data.frame(
+  Item = c("val_n", "miss_ALB", "miss_BUN", "miss_BE", "miss_Outcome",
+           "complete_case_prop", "n_missing_any",
+           "predmat_outcome_col_sum", "predmat_outcome_row_sum",
+           "method_ALB", "method_BUN", "method_BE", "method_Outcome"),
+  Value = c(nrow(raw_val),
+            round(val_miss["ALB"], 4), round(val_miss["BUN"], 4),
+            round(val_miss["BE"], 4), round(val_miss["Outcome"], 4),
+            round(val_complete, 4), val_n_missing,
+            outcome_col_sum, outcome_row_sum,
+            imp_val$method["ALB"], imp_val$method["BUN"], imp_val$method["BE"],
+            ifelse("Outcome" %in% names(imp_val$method),
+                   imp_val$method["Outcome"], NA))
+)
+write.csv(imp_val_check, "results/imp_val_check.csv",
+          row.names = FALSE, quote = FALSE)
+cat("✅ 已保存 results/imp_val_check.csv\n")
 
 ############################################################
 ######### 6. 基线表（基于训练集第 1 套）#########
@@ -664,6 +702,38 @@ write.csv(data.frame(
              mae_train, mae_val)
 ), "results/brier_mae_check.csv", row.names = FALSE, quote = FALSE)
 
+# ============================================================
+# 10.6 ★★★ v4.1 新增：fit_lrm（首套）vs Rubin's rules 合并系数 ★★★
+# ============================================================
+cat("\n===== 10.6 fit_lrm（首套）vs Rubin's rules 合并系数 =====\n")
+
+coef_first  <- coef(fit_lrm)
+coef_pooled <- pooled_summary$estimate
+names(coef_pooled) <- pooled_summary$term
+
+# 统一截距名：把 "(Intercept)" 改为 "Intercept"
+names(coef_pooled)[names(coef_pooled) == "(Intercept)"] <- "Intercept"
+
+# 两边应包含完全相同的项名
+all_terms <- union(names(coef_first), names(coef_pooled))
+stopifnot(all(all_terms %in% names(coef_first)))
+stopifnot(all(all_terms %in% names(coef_pooled)))
+
+cmp <- data.frame(
+  Term   = all_terms,
+  First  = round(coef_first[all_terms], 4),
+  Pooled = round(coef_pooled[all_terms], 4),
+  Diff   = round(coef_first[all_terms] - coef_pooled[all_terms], 4),
+  row.names = NULL
+)
+print(cmp)
+write.csv(cmp, "results/coef_first_vs_pooled.csv", row.names = FALSE, quote = FALSE)
+
+abs_diff <- abs(cmp$Diff)
+cat("\n最大绝对差:", round(max(abs_diff, na.rm = TRUE), 4), "\n")
+cat("|Diff| > 0.01 的系数个数:", sum(abs_diff > 0.01, na.rm = TRUE), "\n")
+cat("|Diff| > 0.05 的系数个数:", sum(abs_diff > 0.05, na.rm = TRUE), "\n")
+cat("✅ 已保存 results/coef_first_vs_pooled.csv\n")
 ############################################################
 ######### 11. 100 次随机划分 AUC（方案 A：每次重新划分+插补简化）
 ############################################################
@@ -815,14 +885,33 @@ write.csv(summary_out, "results/summary_for_manuscript.csv",
           row.names = FALSE, quote = FALSE)
 print(summary_out)
 
+# ============================================================
+# 13b ★★★ v4.1 新增：核对摘要（v4.1 新增两项的浓缩版） ★★★
+# ============================================================
+check_summary <- data.frame(
+  Item = c("val_n", "val_n_missing_any", "val_miss_ALB", "val_miss_BUN", "val_miss_BE",
+           "predmat_outcome_col_sum", "predmat_outcome_row_sum",
+           "coef_max_abs_diff_first_vs_pooled",
+           "coef_n_diff_gt_0.01", "coef_n_diff_gt_0.05"),
+  Value = c(nrow(raw_val), val_n_missing,
+            round(val_miss["ALB"], 4), round(val_miss["BUN"], 4), round(val_miss["BE"], 4),
+            outcome_col_sum, outcome_row_sum,
+            round(max(abs(cmp$Diff), na.rm = TRUE), 4),
+            sum(abs(cmp$Diff) > 0.01, na.rm = TRUE),
+            sum(abs(cmp$Diff) > 0.05, na.rm = TRUE))
+)
+write.csv(check_summary, "results/v41_check_summary.csv",
+          row.names = FALSE, quote = FALSE)
+cat("\n===== v4.1 核对摘要 =====\n")
+print(check_summary)
+
 ############################################################
-# END OF R_analysis.R (v4.0)
+# END OF R_analysis.R (v4.1)
 #
-# 关键改动（相对 v3.2）：
-#   [1] 第 5 节：先 7:3 划分，再分别对训练集和验证集做多重插补
-#   [2] 所有引用 imp 的地方改为 imp_train
-#   [3] 第 10.3 节：内部验证对 imp_val 的 50 套分别评估
-#   [4] 第 10.5 节：Brier/MAE 独立计算（naive + rms::val.prob）
-#   [5] 第 11 节：AUC_distribution 输出 CHEST 风格到 论文图/
-#   [6] 第 13 节：汇总所有关键数字供论文使用
-############################################################
+# 关键改动（相对 v4.0）：
+#   [1] 第 5.7 节：验证集缺失比例 + predictorMatrix Outcome 行列和核对
+#   [2] 第 10.6 节：fit_lrm（首套）vs Rubin's rules 合并系数对比
+#   [3] 第 13b 节：核对摘要汇总到 results/v41_check_summary.csv
+#
+# 所有既有分析逻辑、随机种子、输出文件均未改动。
+# ============================================================
