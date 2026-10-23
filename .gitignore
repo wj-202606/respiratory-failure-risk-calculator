@@ -29,3 +29,4 @@ Thumbs.db
 
 # Figures (regenerate locally)
 figures/
+eicu_probe.py
