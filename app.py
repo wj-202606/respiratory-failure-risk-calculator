@@ -8,7 +8,7 @@ Models:
 
 External validation (MIMIC-IV v3.1):
   BE model:   n=434, 88 deaths, AUC 0.620 (0.553-0.684)
-              recalibration: logit(p_new) = 0.4099*logit(p) - 0.6372
+              recalibration: logit(p_new) = 0.4196*logit(p) - 0.6172
   HCO3 model: n=684, 109 deaths, AUC 0.642 (0.588-0.697)
               recalibration: logit(p_new) = 0.4856*logit(p) - 0.8090
 
@@ -50,9 +50,9 @@ BE_COEF = {
     "BUN":  0.0343,
     "BE":  -0.0585,
 }
-# BE recalibration parameters
-BE_RECAL_A = 0.4099
-BE_RECAL_B = -0.6372
+# BE recalibration parameters (MIMIC-IV)
+BE_RECAL_A = 0.4196
+BE_RECAL_B = -0.6172
 
 # Sensitivity model: HCO3- version (original scale, 50-imputation pooled)
 HCO3_INTERCEPT = 3.1936
@@ -79,7 +79,7 @@ st.sidebar.markdown("**External validation (MIMIC-IV v3.1)**")
 st.sidebar.markdown(
     "- **BE model**: n = 434, 88 deaths\n"
     "  - AUC 0.620 (95% CI 0.553–0.684)\n"
-    "  - Jointly estimated calibration slope 0.410, calibration intercept −0.637\n"
+    "  - Jointly estimated calibration slope 0.420, calibration intercept −0.617\n"
     "  - After two-parameter recalibration: slope 0.999, intercept −0.001; Brier 0.166 → 0.158\n"
     "- **HCO₃⁻ model**: n = 684, 109 deaths\n"
     "  - AUC 0.642 (95% CI 0.588–0.697)\n"
@@ -252,7 +252,7 @@ st.caption(
 )
 st.caption(
     "📌 **External validation (BE)**: AUC 0.620 (95% CI 0.553–0.684); calibration "
-    "slope 0.410, intercept −0.637 before recalibration; after two-parameter "
+    "slope 0.420, intercept −0.617 before recalibration; after two-parameter "
     "recalibration, slope 0.999 and intercept −0.001 (bootstrap OOB provided "
     "internal support for the procedure, although independent external validation "
     "remains necessary)."
