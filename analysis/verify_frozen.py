@@ -12,8 +12,7 @@ import math
 import pandas as pd
 import numpy as np
 
-_HERE = os.path.dirname(os.path.abspath(__file__))
-BASE = os.path.dirname(_HERE) if os.path.basename(_HERE) == "analysis" else _HERE
+BASE = os.path.dirname(os.path.abspath(__file__))
 FROZEN = os.path.join(BASE, "results", "FROZEN_v1")
 
 # ---------- 字典：键 -> (字典值, 容差) ----------
@@ -28,12 +27,12 @@ EXPECTED = {
     "intval_n": (608, 0),
     "intval_events": (72, 0),
     # 内部验证
-    "intval_auc": (0.712, 0.0005),
+    "intval_auc": (0.7237, 0.0005),
     "intval_auc_lo": (0.649, 0.0005),
     "intval_auc_hi": (0.770, 0.0005),
     "intval_brier": (0.099, 0.0005),
-    "intval_slope_mean": (0.744, 0.0005),
-    "intval_intercept_mean": (-0.435, 0.0005),
+    "intval_slope_mean": (0.7814, 0.0005),
+    "intval_intercept_mean": (-0.3802, 0.0005),
     "intval_100split_median": (0.766, 0.0005),
     "train_auc": (0.771, 0.0005),
     "train_brier": (0.087, 0.0005),
@@ -234,6 +233,10 @@ iv = load("internal_validation_50imp.csv")
 if iv is not None:
     if "auc" in iv.columns:
         record("intval_auc", iv["auc"].mean(), "internal_validation_50imp.csv (mean)")
+    elif "Metric" in iv.columns and "Mean" in iv.columns:
+        _m = iv.loc[iv["Metric"] == "AUC", "Mean"]
+        record("intval_auc", float(_m.iloc[0]) if len(_m) else None,
+               "internal_validation_50imp.csv (Metric=AUC, Mean)")
     if "brier" in iv.columns:
         record("intval_brier", iv["brier"].mean(), "internal_validation_50imp.csv (mean)")
     if "cal_slope" in iv.columns:

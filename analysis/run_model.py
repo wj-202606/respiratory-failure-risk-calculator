@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 呼吸衰竭预后预测模型 — Python ML 对比 + SHAP 可解释性
-v4.2：修正 Figure 2B 校准曲线因 xlim 过小导致的末端数据点被裁切问题
+v4.3：Figure 2 数据源改为 FROZEN_v1/external_predictions.csv，确保与 Table 3/5、正文 AUC 0.622 严格闭环
 """
 
 import os
@@ -181,7 +181,7 @@ res_df.to_csv(os.path.join(RESULTS_DIR, "python_model_comparison.csv"),
               index=False)
 
 # ============================================================
-# 4. 外部验证
+# 4. 外部验证（仍保留，用于写出 external_predictions.csv 与 ML 外部对比）
 # ============================================================
 print("\n[3/6] 外部验证（MIMIC-IV）...")
 ext_df = None
@@ -315,11 +315,17 @@ if HAS_SHAP:
         plt.close()
 
 # ============================================================
-# 7. Figure 2: ROC + Calibration（修正坐标轴上限）
+# 7. Figure 2: ROC + Calibration
 # ============================================================
-if mimic_cc is not None and p_ext_logistic is not None:
-    X_mimic = mimic_cc[["alb_g_l", "bun_mmol_l", "be_mmol_l"]].values
-    y_mimic = mimic_cc["outcome"].values.astype(int)
+# 数据源：results/FROZEN_v1/external_predictions.csv（与 Table 3 / Table 5 / 正文一致）
+_ext_path = os.path.join(RESULTS_DIR, "FROZEN_v1", "external_predictions.csv")
+if not os.path.exists(_ext_path):
+    _ext_path = os.path.join(RESULTS_DIR, "external_predictions.csv")
+
+if os.path.exists(_ext_path):
+    _ext = pd.read_csv(_ext_path)
+    y_mimic = _ext["outcome"].astype(int).values
+    p_ext_logistic = _ext["pred_prob"].astype(float).values
 
     fig, axes = plt.subplots(1, 2, figsize=(8.5, 3.8))
 
@@ -368,7 +374,6 @@ if mimic_cc is not None and p_ext_logistic is not None:
 
     ax.set_xlabel("Predicted probability")
     ax.set_ylabel("Observed probability")
-    # ★ 关键修改：将坐标轴上限从 0.4 扩展到 0.5，确保 (0.4936, 0.3636) 的点不被裁切
     ax.set_xlim([0, 0.5])
     ax.set_ylim([0, 0.5])
     ax.set_xticks([0, 0.1, 0.2, 0.3, 0.4, 0.5])
@@ -384,6 +389,9 @@ if mimic_cc is not None and p_ext_logistic is not None:
                             "Figure2_external_ROC_calibration.pdf")
     plt.savefig(out_fig2, dpi=1200)
     plt.close()
+    print(f"[Figure 2] 数据源：{_ext_path}  n={len(y_mimic)}  events={int(y_mimic.sum())}  AUC={auc_ext:.4f}")
+else:
+    print("[Figure 2] 跳过：未找到 external_predictions.csv")
 
 print("\n" + "=" * 70)
 print("完成！")

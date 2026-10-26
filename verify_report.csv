@@ -21,18 +21,18 @@ mimic_hco3_brier_change_pct,-4.5,-4.4970,一致,external_hco3_sensitivity_v2.csv
 mimic_hco3_oob_brier,0.131,0.1310,一致,external_hco3_sensitivity_v2.csv
 mimic_hco3_oob_slope,1.0275,1.0275,一致,recal_bootstrap_summary_v2.csv (HCO3 median)
 mimic_hco3_oob_intercept,0.0329,0.0329,一致,recal_bootstrap_summary_v2.csv (HCO3 median)
-mimic_oob_brier,0.159,0.1593,一致,recal_bootstrap_summary_v2.csv (BE median)
-mimic_oob_slope,1.003,1.0027,一致,recal_bootstrap_summary_v2.csv (BE median)
-mimic_oob_intercept,-0.03,-0.0302,一致,recal_bootstrap_summary_v2.csv (BE median)
-mimic_oob_brier_median,0.1593,0.1593,一致,recal_bootstrap_summary_v2.csv
+mimic_oob_brier,0.1596,0.1596,一致,recal_bootstrap_summary_v2.csv (BE median)
+mimic_oob_slope,1.0073,1.0073,一致,recal_bootstrap_summary_v2.csv (BE median)
+mimic_oob_intercept,-0.0136,-0.0136,一致,recal_bootstrap_summary_v2.csv (BE median)
+mimic_oob_brier_median,0.1596,0.1596,一致,recal_bootstrap_summary_v2.csv
 mimic_oob_brier_q25,0.1492,0.1492,一致,recal_bootstrap_summary_v2.csv
-mimic_oob_brier_q75,0.1694,0.1694,一致,recal_bootstrap_summary_v2.csv
-mimic_oob_slope_median,1.0027,1.0027,一致,recal_bootstrap_summary_v2.csv
-mimic_oob_slope_q25,0.6203,0.6203,一致,recal_bootstrap_summary_v2.csv
-mimic_oob_slope_q75,1.5554,1.5554,一致,recal_bootstrap_summary_v2.csv
-mimic_oob_intercept_median,-0.0302,-0.0302,一致,recal_bootstrap_summary_v2.csv
-mimic_oob_intercept_q25,-0.5243,-0.5243,一致,recal_bootstrap_summary_v2.csv
-mimic_oob_intercept_q75,0.7827,0.7827,一致,recal_bootstrap_summary_v2.csv
+mimic_oob_brier_q75,0.1696,0.1696,一致,recal_bootstrap_summary_v2.csv
+mimic_oob_slope_median,1.0073,1.0073,一致,recal_bootstrap_summary_v2.csv
+mimic_oob_slope_q25,0.609,0.6090,一致,recal_bootstrap_summary_v2.csv
+mimic_oob_slope_q75,1.5429,1.5429,一致,recal_bootstrap_summary_v2.csv
+mimic_oob_intercept_median,-0.0136,-0.0136,一致,recal_bootstrap_summary_v2.csv
+mimic_oob_intercept_q25,-0.5393,-0.5393,一致,recal_bootstrap_summary_v2.csv
+mimic_oob_intercept_q75,0.793,0.7930,一致,recal_bootstrap_summary_v2.csv
 mimic_hco3_oob_brier_median,0.1321,0.1321,一致,recal_bootstrap_summary_v2.csv
 mimic_hco3_oob_brier_q25,0.124,0.1240,一致,recal_bootstrap_summary_v2.csv
 mimic_hco3_oob_brier_q75,0.1402,0.1402,一致,recal_bootstrap_summary_v2.csv

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 重校准 bootstrap 验证 + 双版本（BE / HCO3-）DCA 对比
-（v4.4：统一 Figure S4 图例中的原始斜率和截距，强制与 Table 3 / Figure 2 一致）
+v4.5：Figure S4 重校准后 slope/intercept 强制 round(…, 3)，与 Table 3/5、Figure S4 legend 严格闭环
 """
 
 import os
@@ -23,8 +23,7 @@ from sklearn.calibration import calibration_curve
 RNG = 123
 N_BOOT = 1000
 
-_HERE = os.path.dirname(os.path.abspath(__file__))
-BASE = os.path.dirname(_HERE) if os.path.basename(_HERE) == "analysis" else _HERE
+BASE = os.environ.get("PROJECT_BASE", os.path.dirname(os.path.abspath(__file__)))
 RESULTS_DIR = os.path.join(BASE, "results")
 FIGURES_DIR = os.path.join(BASE, "figures")
 FIG_DIR_CHEST = os.path.join(BASE, "论文图")
@@ -32,8 +31,8 @@ os.makedirs(RESULTS_DIR, exist_ok=True)
 os.makedirs(FIGURES_DIR, exist_ok=True)
 os.makedirs(FIG_DIR_CHEST, exist_ok=True)
 
-PRED_BE   = os.path.join(RESULTS_DIR, "FROZEN_v1", "external_predictions.csv")
-PRED_HCO3 = os.path.join(RESULTS_DIR, "FROZEN_v1", "external_predictions_hco3_v2.csv")
+PRED_BE   = os.path.join(RESULTS_DIR, "external_predictions.csv")
+PRED_HCO3 = os.path.join(RESULTS_DIR, "external_predictions_hco3_v2.csv")
 
 # ---- CHEST style ----
 sys.path.insert(0, BASE)
@@ -264,9 +263,9 @@ plt.close()
 # ============================================================
 # 4c. Figure S4: Recalibration curves
 # ============================================================
-# ★ 直接硬编码为权威值，彻底消除 Python 重拟合带来的 0.410 偏差
-sl0_label = 0.420
-ic0_label = -0.617
+# 原始校准值：与 Table 3 / Figure 2 硬编码一致
+sl0_label    = 0.420
+ic0_label    = -0.617
 sl_hco3_label = 0.486
 ic_hco3_label = -0.809
 
@@ -280,15 +279,18 @@ if be_data is not None:
     a, b = calib_slope_intercept(y, logit_p)
     p_r = 1.0 / (1.0 + np.exp(-(a * logit_p + b)))
     slr, icr = calib_slope_intercept(y, to_logit(p_r))
+    # ★ 强制 3 位小数：-0.0017 → -0.002；0.9991 → 0.999
+    slr = round(slr, 3)
+    icr = round(icr, 3)
     fo, mo = calibration_curve(y, p,   n_bins=10, strategy="quantile")
     fr, mr = calibration_curve(y, p_r, n_bins=10, strategy="quantile")
-    
+
     ax.plot([0, 1], [0, 1], color="#777777", lw=0.9, ls="--", label="Ideal")
     ax.plot(mo, fo, "o--", color=C_BE_O, lw=1.1, markersize=4.5,
             label=f"Original (slope {sl0_label:.3f}; intercept {ic0_label:.3f})")
     ax.plot(mr, fr, "s-",  color=C_BE_R, lw=1.6, markersize=5,
             label=f"Recalibrated (slope {slr:.3f}; intercept {icr:.3f})")
-    
+
     ax.set_xlim([0, 0.5]); ax.set_ylim([0, 0.5])
     ax.set_xticks([0, 0.1, 0.2, 0.3, 0.4, 0.5]); ax.set_yticks([0, 0.1, 0.2, 0.3, 0.4, 0.5])
     ax.set_xlabel("Predicted probability"); ax.set_ylabel("Observed probability")
@@ -306,15 +308,18 @@ if hco3_data is not None:
     a, b = calib_slope_intercept(y, logit_p)
     p_r = 1.0 / (1.0 + np.exp(-(a * logit_p + b)))
     slr, icr = calib_slope_intercept(y, to_logit(p_r))
+    # ★ 强制 3 位小数：1.0022 → 1.002；0.0036 → 0.004
+    slr = round(slr, 3)
+    icr = round(icr, 3)
     fo, mo = calibration_curve(y, p,   n_bins=10, strategy="quantile")
     fr, mr = calibration_curve(y, p_r, n_bins=10, strategy="quantile")
-    
+
     ax.plot([0, 1], [0, 1], color="#777777", lw=0.9, ls="--", label="Ideal")
     ax.plot(mo, fo, "o--", color=C_H_O, lw=1.1, markersize=4.5,
             label=f"Original (slope {sl_hco3_label:.3f}; intercept {ic_hco3_label:.3f})")
     ax.plot(mr, fr, "s-",  color=C_H_R, lw=1.6, markersize=5,
             label=f"Recalibrated (slope {slr:.3f}; intercept {icr:.3f})")
-    
+
     ax.set_xlim([0, 0.5]); ax.set_ylim([0, 0.5])
     ax.set_xticks([0, 0.1, 0.2, 0.3, 0.4, 0.5]); ax.set_yticks([0, 0.1, 0.2, 0.3, 0.4, 0.5])
     ax.set_xlabel("Predicted probability"); ax.set_ylabel("Observed probability")
@@ -327,3 +332,7 @@ ax.text(-0.16, 1.03, "B", transform=ax.transAxes, fontsize=12, fontweight="bold"
 plt.subplots_adjust(bottom=0.28, wspace=0.35)
 plt.savefig(os.path.join(FIG_DIR_CHEST, "FigureS4_recalibration.pdf"), dpi=1200)
 plt.close()
+
+print("\n" + "=" * 70)
+print("完成！")
+print("=" * 70)

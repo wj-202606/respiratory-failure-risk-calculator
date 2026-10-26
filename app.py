@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-Respiratory Failure In-Hospital Mortality Risk Calculator (v4.1)
+Respiratory Failure In-Hospital Mortality Risk Calculator (v4.2)
 
 Models:
   Primary (BE):      LP = 1.7825 - 0.1227*ALB + 0.0343*BUN - 0.0585*BE
   Sensitivity (HCO3): LP = 3.1936 - 0.1209*ALB + 0.0374*BUN - 0.0604*HCO3_
 
 External validation (MIMIC-IV v3.1):
-  BE model:   n=434, 88 deaths, AUC 0.622 (0.553-0.682)
-              recalibration: logit(p_new) = 0.4196*logit(p) - 0.6172
+  BE model:   n=434, 88 deaths, AUC 0.620 (0.553-0.684)
+              recalibration: logit(p_new) = 0.4099*logit(p) - 0.6372
   HCO3 model: n=684, 109 deaths, AUC 0.642 (0.588-0.697)
               recalibration: logit(p_new) = 0.4856*logit(p) - 0.8090
 
@@ -42,7 +42,7 @@ st.caption(
 )
 st.markdown("---")
 
-# ========== Model coefficients (v4.1) ==========
+# ========== Model coefficients (v4.2) ==========
 # Primary model: BE version (original scale)
 BE_INTERCEPT = 1.7825
 BE_COEF = {
@@ -51,8 +51,8 @@ BE_COEF = {
     "BE":  -0.0585,
 }
 # BE recalibration parameters
-BE_RECAL_A = 0.4196
-BE_RECAL_B = -0.6172
+BE_RECAL_A = 0.4099
+BE_RECAL_B = -0.6372
 
 # Sensitivity model: HCO3- version (original scale, 50-imputation pooled)
 HCO3_INTERCEPT = 3.1936
@@ -78,9 +78,9 @@ st.sidebar.markdown(
 st.sidebar.markdown("**External validation (MIMIC-IV v3.1)**")
 st.sidebar.markdown(
     "- **BE model**: n = 434, 88 deaths\n"
-    "  - AUC 0.622 (95% CI 0.553–0.682)\n"
-    "  - Jointly estimated calibration slope 0.420, calibration intercept −0.617\n"
-    "  - After two-parameter recalibration: slope 0.999, intercept −0.002; Brier 0.166 → 0.158\n"
+    "  - AUC 0.620 (95% CI 0.553–0.684)\n"
+    "  - Jointly estimated calibration slope 0.410, calibration intercept −0.637\n"
+    "  - After two-parameter recalibration: slope 0.999, intercept −0.001; Brier 0.166 → 0.158\n"
     "- **HCO₃⁻ model**: n = 684, 109 deaths\n"
     "  - AUC 0.642 (95% CI 0.588–0.697)\n"
     "  - Jointly estimated calibration slope 0.486, calibration intercept −0.809\n"
@@ -225,7 +225,7 @@ with col2:
             st.caption(
                 "In the MIMIC-IV external cohort, the original model produced "
                 "overly extreme predictions and a substantial departure from ideal "
-                "calibration (jointly estimated calibration intercept: BE model −0.62; "
+                "calibration (jointly estimated calibration intercept: BE model −0.64; "
                 "HCO₃⁻ model −0.81). The recalibrated probability is shown for "
                 "research purposes only; it has not been prospectively validated "
                 "for clinical decision-making."
@@ -251,9 +251,9 @@ st.caption(
     "on 2,028 patients and externally validated in MIMIC-IV v3.1 (n = 434)."
 )
 st.caption(
-    "📌 **External validation (BE)**: AUC 0.622 (95% CI 0.553–0.682); calibration "
-    "slope 0.420, intercept −0.617 before recalibration; after two-parameter "
-    "recalibration, slope 0.999 and intercept −0.002 (bootstrap OOB provided "
+    "📌 **External validation (BE)**: AUC 0.620 (95% CI 0.553–0.684); calibration "
+    "slope 0.410, intercept −0.637 before recalibration; after two-parameter "
+    "recalibration, slope 0.999 and intercept −0.001 (bootstrap OOB provided "
     "internal support for the procedure, although independent external validation "
     "remains necessary)."
 )
