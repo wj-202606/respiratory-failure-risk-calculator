@@ -2,7 +2,7 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23300381.svg)](https://doi.org/10.5281/zenodo.23300381)
 
-**Latest version (v1.1.0)**: [10.5281/zenodo.23354599](https://doi.org/10.5281/zenodo.23354599)
+**Latest version (v1.2.0)**: [10.5281/zenodo.23656497](https://doi.org/10.5281/zenodo.23656497)
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://respiratory-failure-risk-calculator-8bdtjwjbpz4arjfskuptqp.streamlit.app)
 
 A 3-variable logistic regression model for predicting in-hospital mortality in adults with respiratory failure, developed at a single tertiary center in China and externally validated in MIMIC-IV v3.1.
