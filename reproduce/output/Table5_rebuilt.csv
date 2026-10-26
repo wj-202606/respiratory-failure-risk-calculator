@@ -1,0 +1,13 @@
+﻿Version,Stage,n,events,AUC,Brier,slope,intercept
+BE (MIMIC-IV),Original,434,88,0.6224,0.1656,0.4196,-0.6172
+BE (MIMIC-IV),Recalibrated,434,88,0.6224,0.1576,0.9991,-0.0017
+HCO₃⁻ (MIMIC-IV),Original,684,109,0.6422,0.1368,0.4855,-0.8095
+HCO₃⁻ (MIMIC-IV),Recalibrated,684,109,0.6422,0.1307,1.0022,0.0036
+BE (MIMIC-IV),Recalibrated (bootstrap OOB),—,—,—,0.1593,1.0027,-0.0302
+HCO₃⁻ (MIMIC-IV),Recalibrated (bootstrap OOB),—,—,—,0.1321,1.0275,0.0329
+BE (eICU-CRD),Original,1505,368,0.67496,0.175864,0.617132,-0.484148
+BE (eICU-CRD),Recalibrated (apparent),1505,368,0.67496,0.170871,0.99998,1.3e-05
+HCO₃⁻ (eICU-CRD),Original,2434,531,0.676354,0.165259,0.64197,-0.612644
+HCO₃⁻ (eICU-CRD),Recalibrated (apparent),2434,531,0.676354,0.158303,0.9998,-0.000195
+BE (eICU-CRD),Recalibrated (bootstrap OOB),1505,368,—,0.171912,1.000885,-0.001034
+HCO₃⁻ (eICU-CRD),Recalibrated (bootstrap OOB),2434,531,—,0.158395,0.996253,-0.012556
