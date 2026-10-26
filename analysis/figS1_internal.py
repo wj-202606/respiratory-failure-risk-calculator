@@ -4,7 +4,7 @@ Figure S1: Internal validation ROC + calibration curves (CHEST style)
 - n = 608, events = 72
 - 3-variable logistic model (ALB, BUN, BE)
 - 输出: 论文图/FigureS1_internal_ROC_calibration.pdf
-- v3: 彻底统一统计口径：A 面板为预设单次分析，B 面板图例明确标注为 50 套均值的稳定性分析
+- v4: 彻底统一统计口径：A 面板为预设单次分析，B 面板图例明确标注为 50 套均值的稳定性分析
 """
 import os
 import sys
@@ -63,9 +63,9 @@ def get_slope_intercept(y_true, p_pred):
 
 slope_apparent, intercept_apparent = get_slope_intercept(y_va, p_va)
 
-# 权威均值（来自 R 侧 50 套插补均值）
-SLOPE_MEAN = 0.781
-INTERCEPT_MEAN = -0.380
+# 预设主分析（单次 7:3 划分）的表观校准值
+SLOPE_SINGLE = slope_apparent
+INTERCEPT_SINGLE = intercept_apparent
 
 print(f"内部验证: AUC={AUC_MAIN:.3f}, 表观 slope={slope_apparent:.3f}, 表观 intercept={intercept_apparent:.3f}")
 
@@ -111,7 +111,7 @@ ax.grid(True)
 # ★ 关键改动：在图例标题中明确写出这是 50 套插补的均值
 ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.22),
           ncol=1, frameon=False, fontsize=8.5,
-          title=f"Mean calibration slope/intercept across 50 imputations:\n{SLOPE_MEAN:.3f} / {INTERCEPT_MEAN:.3f}",
+          title=f"Apparent calibration (single 7:3 split):\nslope {SLOPE_SINGLE:.3f}; intercept {INTERCEPT_SINGLE:.3f}",
           title_fontsize=8)
 ax.text(-0.16, 1.03, "B", transform=ax.transAxes,
         fontsize=12, fontweight="bold", va="bottom", ha="left")
