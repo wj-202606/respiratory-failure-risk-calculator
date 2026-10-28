@@ -1,27 +1,34 @@
 # -*- coding: utf-8 -*-
 """
-Respiratory Failure In-Hospital Mortality Risk Calculator (v4.2)
+Respiratory Failure In-Hospital Mortality Risk Calculator (v4.3)
 
 Models:
   Primary (BE):      LP = 1.7825 - 0.1227*ALB + 0.0343*BUN - 0.0585*BE
   Sensitivity (HCO3): LP = 3.1936 - 0.1209*ALB + 0.0374*BUN - 0.0604*HCO3_
 
 External validation (MIMIC-IV v3.1):
-  BE model:   n=434, 88 deaths, AUC 0.620 (0.553-0.684)
+  BE model:   n=434, 88 deaths, AUC 0.622 (0.553-0.682)
               recalibration: logit(p_new) = 0.4196*logit(p) - 0.6172
   HCO3 model: n=684, 109 deaths, AUC 0.642 (0.588-0.697)
               recalibration: logit(p_new) = 0.4856*logit(p) - 0.8090
 
+eICU-CRD validation (ICU-admission time origin, Plan B):
+  BE model:   n=1,458, 363 deaths, AUC 0.670 (0.638-0.703)
+              recalibration: logit(p_new) = 0.5993*logit(p) - 0.4863
+  HCO3 model: n=2,287, 521 deaths, AUC 0.670 (0.643-0.696)
+              recalibration: logit(p_new) = 0.6189*logit(p) - 0.5914
+
 DCA:
-  Recalibrated BE model: positive net benefit vs treat-all at 15-30%;
-    at 10% the difference is negligible. Greatest gain at 15-20%.
-  Recalibrated HCO3 model: positive net benefit vs treat-all at 10% only;
-    at 15-20% benefit is slightly lower than original model.
-    The net-benefit findings were not uniform across cohorts and thresholds.
+  Recalibrated BE model: positive net benefit vs treat-all at 15-30% in MIMIC-IV
+    and 20-30% in eICU-CRD; at 10% the difference is negligible in MIMIC-IV
+    and slightly below treat-all in eICU-CRD.
+  Recalibrated HCO3 model: positive net benefit vs treat-all at 10% in MIMIC-IV,
+    and 15-30% in eICU-CRD.
 
 Note:
-  eICU-CRD recalibration parameters are reported in the manuscript (Table 7)
-  and are not implemented in this calculator.
+  The calculator displays the original and MIMIC-IV-recalibrated probabilities.
+  eICU-CRD recalibration parameters are reported in the manuscript (Table 7) 
+  and are not implemented here.
 """
 
 import streamlit as st
@@ -37,12 +44,12 @@ st.set_page_config(
 st.title("🏥 Respiratory Failure In-Hospital Mortality Risk Calculator")
 st.caption(
     "A 3-variable logistic model developed at a single center in China "
-    "and externally validated in MIMIC-IV v3.1. This calculator is a "
-    "research-use tool, not a validated clinical device."
+    "and externally evaluated in MIMIC-IV v3.1 and eICU-CRD v2.0. "
+    "This calculator is a research-use tool, not a validated clinical device."
 )
 st.markdown("---")
 
-# ========== Model coefficients (v4.2) ==========
+# ========== Model coefficients ==========
 # Primary model: BE version (original scale)
 BE_INTERCEPT = 1.7825
 BE_COEF = {
@@ -78,23 +85,33 @@ st.sidebar.markdown(
 st.sidebar.markdown("**External validation (MIMIC-IV v3.1)**")
 st.sidebar.markdown(
     "- **BE model**: n = 434, 88 deaths\n"
-    "  - AUC 0.620 (95% CI 0.553–0.684)\n"
-    "  - Jointly estimated calibration slope 0.420, calibration intercept −0.617\n"
-    "  - After two-parameter recalibration: slope 0.999, intercept −0.001; Brier 0.166 → 0.158\n"
+    "  - AUC 0.622 (95% CI 0.553–0.682)\n"
+    "  - Calibration slope 0.420, intercept −0.617\n"
+    "  - After recalibration: slope 0.999, intercept −0.001; Brier 0.166 → 0.158\n"
     "- **HCO₃⁻ model**: n = 684, 109 deaths\n"
     "  - AUC 0.642 (95% CI 0.588–0.697)\n"
-    "  - Jointly estimated calibration slope 0.486, calibration intercept −0.809\n"
-    "  - After two-parameter recalibration: slope 1.002, intercept 0.004; Brier 0.137 → 0.131"
+    "  - Calibration slope 0.486, intercept −0.809\n"
+    "  - After recalibration: slope 1.002, intercept 0.004; Brier 0.137 → 0.131"
+)
+
+st.sidebar.markdown("**External evaluation (eICU-CRD v2.0)**")
+st.sidebar.markdown(
+    "- **BE model**: n = 1,458, 363 deaths\n"
+    "  - AUC 0.670 (95% CI 0.638–0.703)\n"
+    "  - Calibration slope 0.599, intercept −0.486\n"
+    "  - After recalibration: Brier 0.179 → 0.174\n"
+    "- **HCO₃⁻ model**: n = 2,287, 521 deaths\n"
+    "  - AUC 0.670 (95% CI 0.643–0.696)\n"
+    "  - Calibration slope 0.619, intercept −0.591\n"
+    "  - After recalibration: Brier 0.171 → 0.164\n"
+    "- *Note: The eICU-CRD cohort uses ICU admission as the time origin.*"
 )
 
 st.sidebar.markdown("**Clinical utility (DCA, exploratory)**")
 st.sidebar.markdown(
-    "- Recalibrated **BE model** shows positive net benefit vs treat-all\n"
-    "  at **15%–30%** (at 10% the difference is negligible);\n"
-    "  greatest gain at 15%–20%\n"
-    "- Recalibrated **HCO₃⁻ model** shows positive net benefit at **10%** only;\n"
-    "  at 15%–20% benefit is slightly lower than the original model\n"
-    "  (threshold-dependent)"
+    "- Recalibrated **BE model** shows positive net benefit vs treat-all at **15%–30%** in MIMIC-IV and **20%–30%** in eICU-CRD.\n"
+    "- Recalibrated **HCO₃⁻ model** shows positive net benefit vs treat-all at **10%** in MIMIC-IV and **15%–30%** in eICU-CRD.\n"
+    "- *The net-benefit findings were not uniform across cohorts and thresholds.*"
 )
 
 st.sidebar.markdown("---")
@@ -200,7 +217,7 @@ with col2:
         elif p_recal < 0.20:
             risk_level = "🟡 Moderate risk (10–20%)"
             risk_note = ("Within the exploratory DCA range; the recalibrated model "
-                         "showed higher net benefit than treat-all at 15%–20%. "
+                         "showed higher net benefit than treat-all at 15%–20% in MIMIC-IV. "
                          "Whether this translates into changes in management has "
                          "not been prospectively evaluated.")
         elif p_recal < 0.30:
@@ -225,7 +242,7 @@ with col2:
             st.caption(
                 "In the MIMIC-IV external cohort, the original model produced "
                 "overly extreme predictions and a substantial departure from ideal "
-                "calibration (jointly estimated calibration intercept: BE model −0.64; "
+                "calibration (jointly estimated calibration intercept: BE model −0.62; "
                 "HCO₃⁻ model −0.81). The recalibrated probability is shown for "
                 "research purposes only; it has not been prospectively validated "
                 "for clinical decision-making."
@@ -239,7 +256,7 @@ with col2:
                 f"- Linear predictor (LP): **{lp:.4f}**\n"
                 f"- Original probability: **{p_original:.6f}**\n"
                 f"- Recalibrated probability: **{p_recal:.6f}**\n"
-                f"- Recalibration formula: "
+                f"- Recalibration formula (MIMIC-IV): "
                 f"`logit(p_new) = {a:.4f} × logit(p) {sign} {abs(b):.4f}`"
             )
 
@@ -248,37 +265,33 @@ st.markdown("---")
 # ========== Footer ==========
 st.caption(
     "📌 **Model**: Logistic regression, 3 predictors (ALB + BUN + BE), developed "
-    "on 2,028 patients and externally validated in MIMIC-IV v3.1 (n = 434)."
+    "on 2,028 patients and externally evaluated in MIMIC-IV v3.1 (n = 434) and eICU-CRD v2.0 (n = 1,458)."
 )
 st.caption(
-    "📌 **External validation (BE)**: AUC 0.620 (95% CI 0.553–0.684); calibration "
+    "📌 **External validation (MIMIC-IV, BE)**: AUC 0.622 (95% CI 0.553–0.682); calibration "
     "slope 0.420, intercept −0.617 before recalibration; after two-parameter "
-    "recalibration, slope 0.999 and intercept −0.001 (bootstrap OOB provided "
-    "internal support for the procedure, although independent external validation "
-    "remains necessary)."
+    "recalibration, slope 0.999 and intercept −0.001."
+)
+st.caption(
+    "📌 **External evaluation (eICU-CRD, BE)**: AUC 0.670 (95% CI 0.638–0.703); calibration "
+    "slope 0.599, intercept −0.486 before recalibration; after two-parameter "
+    "recalibration, Brier score decreased from 0.179 to 0.174."
 )
 st.caption(
     "📌 **Clinical utility (BE)**: Decision curve analysis showed higher net benefit "
     "than treat-all at threshold probabilities of 15%–30% after recalibration "
-    "(at 10% the difference was negligible), with the greatest gain at 15%–20%. "
+    "in MIMIC-IV (at 10% the difference was negligible) and 20%–30% in eICU-CRD. "
     "These thresholds are exploratory and were not derived from a validated "
     "clinical decision pathway."
 )
 st.caption(
-    "📌 **Sensitivity analysis (HCO₃⁻ model)**: n = 684, AUC 0.642 (95% CI "
-    "0.588–0.697); after recalibration (a = 0.4856, b = −0.8090), positive net "
-    "benefit over treat-all at the 10% threshold; at 15%–20%, net benefit is "
-    "slightly lower than the original model (0.036 vs 0.037 at 15%; 0.016 vs 0.018 "
-    "at 20%). The net-benefit findings were not uniform across cohorts and thresholds."
+    "📌 **Sensitivity analysis (HCO₃⁻ model)**: MIMIC-IV (n=684) AUC 0.642; "
+    "eICU-CRD (n=2,287) AUC 0.670. Net-benefit findings were not uniform across "
+    "cohorts and thresholds."
 )
 st.caption(
     "📌 **Limitations**: Recalibration was apparent (fitted and evaluated on the "
     "same external cohort); prospective external validation is required. External "
     "discrimination is modest. This tool is for research use only and does "
     "not replace clinical judgment."
-)
-st.caption(
-    "📌 **eICU-CRD**: recalibration parameters for the eICU-CRD cohort are "
-    "reported in the manuscript (Table 7) and are not implemented in this "
-    "calculator."
 )
