@@ -293,11 +293,11 @@ if HAS_SHAP:
             shap_values = shap_values[:, :, 1]
 
         # Summary plot
-        plt.figure(figsize=(7, 4.5))
+        plt.figure(figsize=(8, 5.0))
         shap.summary_plot(shap_values, X_train,
                           feature_names=FEATURES, plot_type="dot",
                           cmap=CMAP_SHAP, show=False, plot_size=None)
-        plt.xlabel("SHAP value", fontsize=10)
+        plt.xlabel("SHAP value (log-odds)", fontsize=11)
         plt.tight_layout()
         plt.savefig(os.path.join(FIG_DIR_CHEST, "FigureS3_SHAP_summary.pdf"),
                     dpi=1200, bbox_inches="tight")
@@ -344,8 +344,9 @@ if os.path.exists(_ext_path):
             transform=ax.transAxes, fontsize=8,
             va="top", ha="left")
 
-    ax.set_xlabel("1 − Specificity")
-    ax.set_ylabel("Sensitivity")
+    ax.set_xlabel("1 − Specificity", fontsize=11)
+    ax.set_ylabel("Sensitivity", fontsize=11)
+    ax.tick_params(axis='both', labelsize=10)
     ax.set_xlim([-0.02, 1.02])
     ax.set_ylim([-0.02, 1.02])
     ax.set_xticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
@@ -372,8 +373,9 @@ if os.path.exists(_ext_path):
             transform=ax.transAxes, fontsize=8,
             va="top", ha="left")
 
-    ax.set_xlabel("Predicted probability")
-    ax.set_ylabel("Observed probability")
+    ax.set_xlabel("Predicted probability", fontsize=11)
+    ax.set_ylabel("Observed probability", fontsize=11)
+    ax.tick_params(axis='both', labelsize=10)
     ax.set_xlim([0, 0.5])
     ax.set_ylim([0, 0.5])
     ax.set_xticks([0, 0.1, 0.2, 0.3, 0.4, 0.5])

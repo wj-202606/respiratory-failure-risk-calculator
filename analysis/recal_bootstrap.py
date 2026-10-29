@@ -213,7 +213,7 @@ C_H_R    = "#B2182B"
 C_H_TA   = "#888888"
 HCO3_LABEL = r"HCO$_3^-$"
 
-fig, ax = plt.subplots(figsize=(7.2, 4.6))
+fig, ax = plt.subplots(figsize=(7.6, 4.6))
 prev_max = 0.0
 
 if be_data is not None:
@@ -226,7 +226,7 @@ if be_data is not None:
     prev = y.mean(); prev_max = max(prev_max, prev)
     nb_all = prev - (1 - prev) * (thresholds / (1 - thresholds))
     ax.plot(thresholds, nb_o, color=C_BE_O, lw=1.1, ls="--", label="BE original")
-    ax.plot(thresholds, nb_r, color=C_BE_R, lw=1.6, label="BE recalibrated")
+    ax.plot(thresholds, nb_r, color=C_BE_R, lw=2.0, label="BE recalibrated")
     ax.plot(thresholds, nb_all, color=C_BE_TA, lw=0.9, ls=":", label="BE treat-all")
 
 if hco3_data is not None:
@@ -239,7 +239,7 @@ if hco3_data is not None:
     prev = y.mean(); prev_max = max(prev_max, prev)
     nb_all = prev - (1 - prev) * (thresholds / (1 - thresholds))
     ax.plot(thresholds, nb_o, color=C_H_O, lw=1.1, ls="--", label=f"{HCO3_LABEL} original")
-    ax.plot(thresholds, nb_r, color=C_H_R, lw=1.6, label=f"{HCO3_LABEL} recalibrated")
+    ax.plot(thresholds, nb_r, color=C_H_R, lw=2.0, label=f"{HCO3_LABEL} recalibrated")
     ax.plot(thresholds, nb_all, color=C_H_TA, lw=0.9, ls=":", label=f"{HCO3_LABEL} treat-all")
 
 ax.axhline(0, color="#444444", lw=0.8, ls=":", alpha=0.7)
@@ -248,13 +248,23 @@ ax.set_xlim([0, 0.5])
 ylim_top = max(0.25, prev_max * 1.35)
 ax.set_ylim([-0.05, ylim_top])
 ax.set_xticks([0, 0.1, 0.2, 0.3, 0.4, 0.5])
-ax.set_xlabel("Threshold probability")
-ax.set_ylabel("Net benefit")
+
+# 修改 1：放大坐标轴标签
+ax.set_xlabel("Threshold probability", fontsize=11)
+ax.set_ylabel("Net benefit", fontsize=11)
+
+# 修改 1：放大坐标轴刻度
+ax.tick_params(axis='both', which='major', labelsize=10)
+
 ax.grid(True, alpha=0.25)
-ax.text(0.20, ylim_top * 0.96, "Exploratory range 10-30%",
-        ha="center", va="top", fontsize=8.5, color="#666666", style="italic")
+
+# 修改 1：替换阴影文字并放大字号
+ax.text(0.20, ylim_top * 0.96, "Exploratory threshold range (10%–30%)",
+        ha="center", va="top", fontsize=9.0, color="#666666", style="italic")
+
+# 修改 1：放大图例字体
 ax.legend(loc="center left", bbox_to_anchor=(1.02, 0.5),
-          frameon=True, framealpha=0.95, edgecolor="#CCCCCC", fontsize=8.5)
+          frameon=True, framealpha=0.95, edgecolor="#CCCCCC", fontsize=9.0)
 
 plt.tight_layout()
 plt.savefig(os.path.join(FIG_DIR_CHEST, "Figure3_DCA.pdf"), dpi=1200, bbox_inches="tight")
@@ -289,7 +299,7 @@ if be_data is not None:
     ax.plot(mo, fo, "o--", color=C_BE_O, lw=1.1, markersize=4.5,
             label=f"Original (slope {sl0_label:.3f}; intercept {ic0_label:.3f})")
     ax.plot(mr, fr, "s-",  color=C_BE_R, lw=1.6, markersize=5,
-            label=f"Recalibrated (slope {slr:.3f}; intercept {icr:.3f})")
+            label=f"BE recalibrated (slope {slr:.3f}; intercept {icr:.3f})")
 
     ax.set_xlim([0, 0.5]); ax.set_ylim([0, 0.5])
     ax.set_xticks([0, 0.1, 0.2, 0.3, 0.4, 0.5]); ax.set_yticks([0, 0.1, 0.2, 0.3, 0.4, 0.5])
@@ -318,7 +328,7 @@ if hco3_data is not None:
     ax.plot(mo, fo, "o--", color=C_H_O, lw=1.1, markersize=4.5,
             label=f"Original (slope {sl_hco3_label:.3f}; intercept {ic_hco3_label:.3f})")
     ax.plot(mr, fr, "s-",  color=C_H_R, lw=1.6, markersize=5,
-            label=f"Recalibrated (slope {slr:.3f}; intercept {icr:.3f})")
+            label=rf"HCO$_3^-$ recalibrated (slope {slr:.3f}; intercept {icr:.3f})")
 
     ax.set_xlim([0, 0.5]); ax.set_ylim([0, 0.5])
     ax.set_xticks([0, 0.1, 0.2, 0.3, 0.4, 0.5]); ax.set_yticks([0, 0.1, 0.2, 0.3, 0.4, 0.5])
