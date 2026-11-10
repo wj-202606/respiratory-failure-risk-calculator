@@ -1,0 +1,27 @@
+table,panel,file,format,notes
+Table 1,all,results/Table1_v6_2_10.csv,CSV,4 cohorts: Development / Training / Internal val / External
+Table 2,A,results/LASSO_vars_frequency.csv,CSV,LASSO selection frequencies
+Table 2,B,results/Rubin_OR_main3.csv,CSV,BE model Rubin pooled coefficients
+Table 2,C,results/Rubin_OR_hco3.csv,CSV,HCO3 model Rubin pooled coefficients
+Table 2,all,results/Table2.csv,CSV,long format: A / B / C combined
+Table 3,all,tables/Table3.csv,CSV,main + internal + external
+Table 4,all,tables/Table4.csv,CSV,"6 ML algorithms, internal + external"
+Table 5,all,tables/Table5.csv,CSV,recalibration + bootstrap OOB
+Table 6a,all,tables/Table6a.csv,CSV,DCA MIMIC-IV
+Table 6b,all,tables/Table6b.csv,CSV,DCA eICU-CRD
+Table S1,all,results/LASSO_vars_frequency.csv,CSV,9 variables
+Table S2,A,results/TableS2_hco3_coefficients.csv,CSV,frozen coefficients
+Table S2,B,results/TableS2_hco3_sensitivity.csv,CSV,external AUC + Brier
+Table S4,A,results/TableS4_delong_internal.csv,CSV,15 pairs internal
+Table S4,B,results/TableS4_delong_external.csv,CSV,21 pairs external
+Table S5,all,results/TableS5_representative.csv,CSV,5 models (4 published + this study)
+Table S6,all,results/TableS6_this_study_row.csv,CSV,single row
+Table S7a,all,results/TableS7a_dev_vs_mimic.csv,CSV,6 variables
+Table S7b,all,results/TableS7b_dev_vs_eicu.csv,CSV,7 variables
+Table S8,all,results/TableS8_inclusion_vs_exclusion.csv,CSV,6 variables
+Table S9,all,results/TableS9_alb_missing.csv,CSV,5 variables
+Table S10,all,results/two_var_summary.csv,CSV,2-variable vs 3-variable
+Table S11,all,results/TableS11_eicu_baseline.csv,CSV,7 variables
+Table S12,all,results/TableS12_eicu_incl_vs_excl.csv,CSV,8 rows
+Table S13,all,results/TableS13_eicu_alb_measured_vs_not.csv,CSV,5 variables
+Table S14,all,tables/TableS14.csv,CSV,SOFA + APACHE IVa comparison

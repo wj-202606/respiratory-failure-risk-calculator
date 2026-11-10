@@ -1,0 +1,16 @@
+Cohort,Model 1,AUC 1,Model 2,AUC 2,Delta AUC,z,P (DeLong),P (Holm)
+Internal validation,Logistic,0.7435,RandomForest,0.7478,-0.0044,-0.3891,0.697,1.000
+Internal validation,Logistic,0.7435,XGBoost,0.7415,0.002,0.1833,0.855,1.000
+Internal validation,Logistic,0.7435,LightGBM,0.7197,0.0238,1.2767,0.202,0.807
+Internal validation,Logistic,0.7435,SVM,0.5869,0.1566,3.5233,<0.001,0.004
+Internal validation,Logistic,0.7435,MLP,0.4452,0.2983,5.6875,<0.001,<0.001
+Internal validation,RandomForest,0.7478,XGBoost,0.7415,0.0064,0.8599,0.390,1.000
+Internal validation,RandomForest,0.7478,LightGBM,0.7197,0.0281,1.8014,0.072,0.430
+Internal validation,RandomForest,0.7478,SVM,0.5869,0.161,3.6874,<0.001,0.002
+Internal validation,RandomForest,0.7478,MLP,0.4452,0.3027,5.7355,<0.001,<0.001
+Internal validation,XGBoost,0.7415,LightGBM,0.7197,0.0217,1.7867,0.074,0.430
+Internal validation,XGBoost,0.7415,SVM,0.5869,0.1546,3.502,<0.001,0.004
+Internal validation,XGBoost,0.7415,MLP,0.4452,0.2963,5.775,<0.001,<0.001
+Internal validation,LightGBM,0.7197,SVM,0.5869,0.1329,2.7637,0.006,0.046
+Internal validation,LightGBM,0.7197,MLP,0.4452,0.2746,5.3294,<0.001,<0.001
+Internal validation,SVM,0.5869,MLP,0.4452,0.1417,2.4148,0.016,0.110

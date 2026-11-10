@@ -1,2 +1,2 @@
-Version,Stage,n,events,AUC,AUC_lo,AUC_hi,Brier,Brier_lo,Brier_hi,cal_slope,cal_intercept,recal_a,recal_b,Brier_recal,slope_recal,intercept_recal,OOB_Brier_median,OOB_slope_median,OOB_intercept_median
-HCO3,Original,2434,531,0.676354,0.649241,0.702037,0.165259,0.156804,0.173694,0.641970,-0.612644,0.641970,-0.612644,0.158303,0.999800,-0.000195,0.158577,1.004056,-0.002009
+Version,Stage,n,events,AUC,AUC_lo,AUC_hi,Brier,Brier_lo,Brier_hi,cal_slope,cal_intercept,recal_a,recal_b,Brier_recal,slope_recal,intercept_recal,OOB_Brier_median,OOB_Brier_q25,OOB_Brier_q75,OOB_slope_median,OOB_slope_q25,OOB_slope_q75,OOB_intercept_median,OOB_intercept_q25,OOB_intercept_q75
+HCO3,Original,2287,521,0.669635,0.643349,0.695828,0.170649,0.161798,0.180071,0.618946,-0.591423,0.618946,-0.591423,0.163888,0.999641,-0.000225,0.163839,0.159808,0.168105,0.989460,0.879033,1.143698,-0.000476,-0.148586,0.164720

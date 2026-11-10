@@ -1,0 +1,36 @@
+MIMIC HCO3 source closure report
+Generated: 2026-11-04T17:02:20
+MIMIC wide CSV: D:\mimic_wide_with_hco3.csv
+
+SHA256: b151612f75c568fce52f5a472206608682daaecd1a8ae2302595c45a0b3a72eb
+Rows: 2456, Cols: 8, Rows with HCO3: 684
+  [OK  ] wide hash matches expected  (b151612f...)
+
+mimic_prediction_manifest.csv:
+  BE    n=434 events=88 coef=5812366e3f94… mimic=b151612f75c5… model_version=v6.2.2
+  HCO3  n=684 events=109 coef=ac6669074627… mimic=b151612f75c5… model_version=v6.2.2
+  [OK  ] manifest present and non-empty
+  [OK  ] BE row present
+  [OK  ] HCO3 row present
+  [OK  ] model_version consistent  (BE=v6.2.2, HCO3=v6.2.2)
+  [OK  ] both mimic_sha256 match expected
+
+  [OK  ] BE prediction has required columns
+  [OK  ] BE hadm_id non-missing and unique
+  [OK  ] BE n matches manifest  (file=434, manifest=434)
+  [OK  ] BE events matches manifest  (file=88, manifest=88)
+  [OK  ] BE per-row mimic_sha256 matches expected
+  [INFO] BE prediction file SHA256: 4ec4f8fffda93900...
+  [OK  ] HCO3 prediction has required columns
+  [OK  ] HCO3 hadm_id non-missing and unique
+  [OK  ] HCO3 n matches manifest  (file=684, manifest=684)
+  [OK  ] HCO3 events matches manifest  (file=109, manifest=109)
+  [OK  ] HCO3 per-row mimic_sha256 matches expected
+  [INFO] HCO3 prediction file SHA256: 6797dd402ffc4d5e...
+
+Historical provenance (from v14.0 handoff):
+  HCO3 taken from external_predictions_hco3_OLD_20261016.csv (684 rows);
+  ALB/BUN max|diff| vs D:\mimic_wide.csv = 4.44e-14.
+
+Checks total: 16, passed: 16
+Status: CLOSED

@@ -1,0 +1,3 @@
+Comparison,AUC_1,AUC_2,z,p_paired_delong,n
+Python_Logistic vs RandomForest,0.7435,0.7478,-0.3891,0.6972,608
+FrozenR_Logistic vs Python_Logistic (external),0.6204,0.6199,0.5779,0.5633,434

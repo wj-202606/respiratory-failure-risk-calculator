@@ -1,2 +1,2 @@
-Version,Stage,n,events,AUC,AUC_lo,AUC_hi,Brier,Brier_lo,Brier_hi,cal_slope,cal_intercept,recal_a,recal_b,Brier_recal,slope_recal,intercept_recal,OOB_Brier_median,OOB_slope_median,OOB_intercept_median
-BE,Original,1505,368,0.674960,0.642361,0.706896,0.175864,0.164664,0.187593,0.617132,-0.484148,0.617132,-0.484148,0.170871,0.999980,0.000013,0.171391,0.998671,-0.000113
+Version,Stage,n,events,AUC,AUC_lo,AUC_hi,Brier,Brier_lo,Brier_hi,cal_slope,cal_intercept,recal_a,recal_b,Brier_recal,slope_recal,intercept_recal,OOB_Brier_median,OOB_Brier_q25,OOB_Brier_q75,OOB_slope_median,OOB_slope_q25,OOB_slope_q75,OOB_intercept_median,OOB_intercept_q25,OOB_intercept_q75
+BE,Original,1458,363,0.670025,0.637862,0.703338,0.178855,0.167373,0.190434,0.599300,-0.486282,0.599300,-0.486282,0.173564,0.999975,0.000006,0.173875,0.169168,0.179394,1.000296,0.856564,1.156990,-0.004630,-0.171773,0.174936

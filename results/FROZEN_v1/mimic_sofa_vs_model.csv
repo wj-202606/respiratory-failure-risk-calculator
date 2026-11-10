@@ -1,0 +1,3 @@
+Version,n,events,AUC_model,AUC_model_lo,AUC_model_hi,AUC_sofa,AUC_sofa_lo,AUC_sofa_hi,delta_AUC,delta_AUC_lo,delta_AUC_hi,delta_AUC_bootstrap_reps,delta_AUC_bootstrap_method,delong_z,delong_p
+BE,393,85,0.613000,0.546600,0.679800,0.638000,0.569600,0.704500,-0.025000,-0.092300,0.044200,2000,paired_outcome_stratified_percentile,0.698300,0.484970
+HCO3,467,103,0.612300,0.551100,0.671100,0.641600,0.580100,0.701400,-0.029200,-0.102300,0.034800,2000,paired_outcome_stratified_percentile,0.852400,0.393989

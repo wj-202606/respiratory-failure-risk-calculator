@@ -1,0 +1,7 @@
+Model,AUC_val,Brier_val,best_iter_inner_cv
+RandomForest,0.7478,0.0962,
+Logistic,0.7435,0.0975,
+XGBoost,0.7415,0.0961,93.0
+LightGBM,0.7197,0.0978,90.0
+SVM,0.5869,0.1033,
+MLP,0.4452,0.162,

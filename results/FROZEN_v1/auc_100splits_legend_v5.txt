@@ -1,0 +1,8 @@
+Mode: repeated_split_fixed_prespecified_model
+Imputation repeated within each split: YES
+m per split: 50
+Median AUC: 0.7513
+IQR: 0.7313 - 0.772
+SD: 0.0268
+
+The imputation and estimation pipeline for the prespecified fixed three-variable model was repeated within each random split; predictor selection was not repeated.

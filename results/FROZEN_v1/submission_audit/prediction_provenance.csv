@@ -1,0 +1,5 @@
+file,model,n,events,coef_sha256,mimic_sha256,model_version
+external_predictions.csv,BE,434,88,5812366e3f94c2642b2bc5e51b5c642fd740594016e9f41361e7dbdd29fc01d3,b151612f75c568fce52f5a472206608682daaecd1a8ae2302595c45a0b3a72eb,v6.2.2
+external_predictions_hco3_v2.csv,HCO3,684,109,ac6669074627712d1b8f9b54b57fa765a7e29f9a3e4a4bf6fc6fa276af5d899b,b151612f75c568fce52f5a472206608682daaecd1a8ae2302595c45a0b3a72eb,v6.2.2
+eicu_predictions_be.csv,BE,1458,363,5812366e3f94c2642b2bc5e51b5c642fd740594016e9f41361e7dbdd29fc01d3,N/A (eICU-CRD),v6.0
+eicu_predictions_hco3.csv,HCO3,2287,521,ac6669074627712d1b8f9b54b57fa765a7e29f9a3e4a4bf6fc6fa276af5d899b,N/A (eICU-CRD),v6.0

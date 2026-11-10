@@ -1,0 +1,85 @@
+﻿FINAL VALIDATION REPORT v1.0
+======================================================================
+Archive generated: 2026-11-06T10:55:10
+
+This report documents the contents of the AIC submission archive
+generated on the date above. The statistical analysis itself was
+run at an earlier date; the archive date and the analysis date
+are distinct and should not be conflated.
+
+Analysis versions
+-----------------
+  Statistical analysis base: v6.2.10
+  R analysis pipeline:       v5.4.1
+  Python environment:        3.10.4
+  R environment:             4.5.1
+
+Analysis run timestamps (from internal manifests)
+--------------------------------------------------
+  R_analysis_v5_4_1.R:      2026-11-04 23:31 (Section 10) to
+                            2026-11-05 07:36 (Section 11, 100 splits)
+  Pipeline v6.2.10:         2026-11-04 16:59:45 → 17:02:20
+                            (results/pipeline_run_manifest_20261104_163126.txt)
+  Submission audit:         2026-11-06 (this archive)
+
+Frozen reference values (v6.2.10)
+---------------------------------
+  MIMIC-IV BE:      n=434,  88 events; AUC 0.620 (0.555–0.681); Brier 0.166 (0.155–0.178); slope 0.410; intercept −0.637
+  MIMIC-IV HCO3:    n=684, 109 events; AUC 0.642 (0.588–0.700); Brier 0.137 (0.129–0.145); slope 0.485; intercept −0.809
+  eICU-CRD BE:      n=1,458, 363 events; AUC 0.670 (0.638–0.703); Brier 0.179 (0.167–0.190); slope 0.599; intercept −0.486
+  eICU-CRD HCO3:    n=2,287, 521 events; AUC 0.670 (0.643–0.696); Brier 0.171 (0.162–0.180); slope 0.619; intercept −0.591
+  Internal val:     AUC 0.727 (SD 0.006); slope 0.797; intercept −0.356
+  100-split median: AUC 0.751 (IQR 0.731–0.772)
+
+Files verified in this archive
+------------------------------
+  The SHA256SUMS.txt in this directory lists the exact SHA256
+  and byte size of every file in results/FROZEN_v1/. All hashes
+  in that manifest were computed against the archive generated
+  on the date above.
+  Historical files from earlier analysis rounds are preserved in
+results/FROZEN_v1/archive_old/ and are excluded from
+SHA256SUMS.txt. They are not part of the current v6.2.10 pipeline.
+
+Checks that passed
+------------------
+  [OK] Direction audit: 5,000 AUC calculations, 0 flips
+  [OK] Bootstrap valid-replicate counts: 4 metrics x 2 models = 8 x 2,000
+  [OK] MIMIC wide SHA256 guard: verified
+  [OK] Coefficient hashes: verified against current coef files
+  [OK] Closure report: CLOSED (16/16 checks)
+  [OK] Table 1 n matches Table 3 (Training 1,420 / Internal val 608)
+
+Pending / not yet completed at archive time
+--------------------------------------------
+  [ ] Manuscript v5.1 numeric replacement (in progress)
+  [ ] Keywords 13 → 5
+  [ ] Highlights 3–5
+  [ ] CRediT author contributions
+  [ ] Declaration of generative AI use
+  [ ] Cover letter finalization
+  [ ] EndNote reference insertion (40 references)
+  [ ] Ethics approval number (2 places)
+
+Note: This report describes the archived data and code as of
+the archive date. It does not certify that the manuscript has
+been finalized. The manuscript and supplementary materials are
+separate deliverables.
+
+End of report.
+
+Table 1 external cohort provenance (independent recomputation)
+--------------------------------------------------------------
+  The Age and Male rows of Table 1 (External column, MIMIC-IV BE
+  complete-case cohort, n = 434) were independently recomputed on
+  2026-11-06 from D:\mimic_wide_with_demo.csv, columns 'age' and
+  'male', matched by hadm_id to results/external_predictions.csv
+  (n = 434 hadm_id set; one-to-one merge; 434 of 434 matched).
+  Recomputed values:
+    Age, mean (SD) = 64.1 (15.4)
+    Male, n (%)    = 246 (56.7)
+  These match Table1_v6_2_10.csv (External column) exactly.
+  The underlying patient-level data are not redistributed; they
+  remain under the PhysioNet credentialed-access agreement. The
+  verification script is stored as verify_table1.py in the project
+  root.

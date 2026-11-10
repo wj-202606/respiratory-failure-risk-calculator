@@ -1,0 +1,55 @@
+TABLES_SHA256SUMS
+======================================================================
+Archive generated: 2026-11-06T22:30:20
+Base directory: C:\Users\24339\Desktop\6.30呼吸衰竭\6.30呼衰\1.R数据预处理+变量筛选9.21
+
+This manifest covers all manuscript tables (main + supplementary)
+and their source CSVs. It is separate from SHA256SUMS.txt,
+which covers only the frozen results in results/FROZEN_v1/.
+
+Table      Panel        Size  SHA256                                                            File
+----------------------------------------------------------------------------------------------------
+Table 1    all           622  0602644f62f80558e53b14c4e9483f8bcdfb940990f65cb888f221c4881a2731  results/Table1_v6_2_10.csv
+Table 1    all          1488  9036727a1f0948303ce2e653e37501df0e3ba38b564410767654d2dd9b6a5b4c  tables/Table1.md
+Table 2    A             138  c486fa61a3aee5278d16167018907aa633e41836478239d7f83e92203bd93c8a  results/LASSO_vars_frequency.csv
+Table 2    B             229  02232aa86c4c45b22ec53b263f93e87091827ade45f0319b95f4218236bdc339  results/Rubin_OR_main3.csv
+Table 2    C             235  6797f43b82d330fc03fd811c5d815abf787b3bbc0c97888d97d9240dc62511bb  results/Rubin_OR_hco3.csv
+Table 2    all           671  ef1269a91089d5e2e734021ff301b375b72d61ce15af547a4360c2f8b4705012  results/Table2.csv
+Table 2    all          2440  cf661678d8c3833d9cef6e7055390ec3967c5bdbe4f3149953f1f127bcd5f746  tables/Table2.md
+Table 3    all          1135  5a2773e114c85a3f61d8c5c8edd309376bbfaa53a5168f83738919c1b0751cf4  tables/Table3.csv
+Table 3    all          2917  65fbe7c537600c4dce36cde57fe4b89522d9d427b75a2d28a86d1cab50225b83  tables/Table3.md
+Table 4    all           318  e3daff35e66e924d785a8951f7bfa56187fb00b51378b5031b0065d6318d371f  tables/Table4.csv
+Table 4    all          1332  627316dec30d0aeacbb7cf30974667cf706bbbf3c892285d00ab65e4c91e2de0  tables/Table4.md
+Table 5    all          1218  7aaa3ced4a29bee71bc4ecdf1ee7c222da52b9db3066a6e0c73273ffaf15196f  tables/Table5.csv
+Table 5    all          2519  4de1d3d40e66361b3f686d67f64e92464320c8945d0725ef41b048c7f3062614  tables/Table5.md
+Table 6a   all           275  2f4ac169e922deb5da553a36a8db1b0b658fef2676e88746e8d5c5786883569f  tables/Table6a.csv
+Table 6a   all           945  b6ce1ba81b362f4c9d40050e8d9b3c049f467b7011bfc2058b0fd6e36f6a2499  tables/Table6a.md
+Table 6b   all           270  b617cb3879839490a2a44824f43b2a221b865a002e61a8d8b8d43e05f9b9ee0e  tables/Table6b.csv
+Table 6b   all           932  80d6da0c79fb0391ad14873b389764f6dd7c951a445aed5247423fa825134b86  tables/Table6b.md
+Table S1   all           138  c486fa61a3aee5278d16167018907aa633e41836478239d7f83e92203bd93c8a  results/LASSO_vars_frequency.csv
+Table S2   A             105  0f4df4fde41ebe0909be40072e52ec9f24561fd0c78955f85596ba5e4deb7170  results/TableS2_hco3_coefficients.csv
+Table S2   B             242  0cae6b5f625f9243acdf9e98f55bb17e0e3daaffa2a5e406e367699b7f10c2f0  results/TableS2_hco3_sensitivity.csv
+Table S2   all          2801  5729565704ea4ebb61cb20954c94065fb29c88b1cf98f688926bdfa6b7e5325a  tables/TableS2.md
+Table S4   A            1227  caa2ed243ead926ff04fe3438fd50bd1aa5ef5fa6cbebcc7176285ff16725921  results/TableS4_delong_internal.csv
+Table S4   B            2003  a7e90602221295505e997b030e535469d18b3eec733e4a2cebad005245b0335b  results/TableS4_delong_external.csv
+Table S4   all          4950  28378699f05859bc2e98fbede28bbdce42725ee319bb407b8a4fd31e4032a09f  tables/TableS4.md
+Table S5   all           833  ac804dd87ed0792a85a2c38519aa08712672aa03e91156e85ac6363da72042a8  results/TableS5_representative.csv
+Table S5   all          1935  f06715b5c4ef961c095e1fc99dcbee1ccba8147179e6411dd946c749d0fbc5a0  tables/TableS5.md
+Table S6   all           466  832536d575268109a3c7c208b3d0a1d4b52262dc38fdd176180244b4076b046a  results/TableS6_this_study_row.csv
+Table S7a  all           310  1f1f229d7ef12b30c58be29054aea245c76a91f6b534ffb2f12de487ef7793aa  results/TableS7a_dev_vs_mimic.csv
+Table S7a  all           947  9b327321a39b9e758b40dcb2af322ab1548da999626ce59bf6886aa00e7e3cfc  tables/TableS7a.md
+Table S7b  all           525  f4f5edeba3a88d7b40f0e5d1eb44cfbf053e96c437cc2fca7d913c045d69dc2a  results/TableS7b_dev_vs_eicu.csv
+Table S8   all           441  0e6943403cc87a51051b80bf1a76e5cf92e15c6affb9f635e1a7a0809a42b663  results/TableS8_inclusion_vs_exclusion.csv
+Table S9   all           332  c02f85ed397c5d374e7d549d0e232ce61334a37ad81a142816a9ef430bdc78b3  results/TableS9_alb_missing.csv
+Table S10  all           181  7090a07348c10524d2c61a04d662ba5ce50a67621d9233e0e4261d59cd57146f  results/two_var_summary.csv
+Table S11  all           376  824a4940fdf665d5cc6ad7138ecec51605224772cdc4bd676b7f6399698703dd  results/TableS11_eicu_baseline.csv
+Table S12  all           544  e1d4b3767cd124da1689e46ad3e8d2b35dc61aec7daa379099158f2322e20b67  results/TableS12_eicu_incl_vs_excl.csv
+Table S12  all           544  e1d4b3767cd124da1689e46ad3e8d2b35dc61aec7daa379099158f2322e20b67  tables/TableS12.csv
+Table S12  all          1077  2d6694eb2805813d561b145f643ba0cca499a0226a3dd3b1ec5d22f7eee5c05a  tables/TableS12.md
+Table S13  all           360  fea3aca2a92efa23076158b6ae58e1d3295299d62a8076f1f74552580abd44ce  results/TableS13_eicu_alb_measured_vs_not.csv
+Table S14  all           669  08929e9297c15896b871e0aa1122348923b6a66c105ca1991eba763d93541d86  tables/TableS14.csv
+Table S14  all          2660  54c186113dd0da9559cb32c314566faeef879a7dd15642d8a77fc45fed7c8942  tables/TableS14.md
+
+Total expected entries: 40
+Files present: 40
+Files missing: 0

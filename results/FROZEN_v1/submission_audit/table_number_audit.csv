@@ -1,0 +1,33 @@
+table,subset,AUC,Brier,slope,intercept,source
+Table 1,"Development (n=2,028, 226 events)",,,,,Table1_v6_2_10.csv
+Table 1,"Training (n=1,420, 154 events)",,,,,Table1_v6_2_10.csv
+Table 1,"Internal validation (n=608, 72 events)",,,,,Table1_v6_2_10.csv
+Table 1,"External MIMIC-IV (n=434, 88 events)",,,,,Table1_v6_2_10.csv
+Table 2,"BE model coefficients (n=2,028)",,,,,Rubin_OR_main3.csv
+Table 2,"HCO3 model coefficients (n=2,028)",,,,,Rubin_OR_hco3.csv
+Table 3,"Training subset (n=1,420, 154 events)",0.767,0.088,—,—,tables/Table3.csv
+Table 3,"Internal validation (n=608, 72 events)",0.727 (SD 0.006),0.098 (SD 0.001),0.797 (0.781–0.819),−0.356 (−0.385 to −0.316),tables/Table3.csv
+Table 3,"MIMIC-IV BE (n=434, 88 events)",0.620 (0.555–0.681),0.166 (0.155–0.178),0.410,−0.637,tables/Table3.csv
+Table 3,"MIMIC-IV HCO3 (n=684, 109 events)",0.642 (0.588–0.700),0.137 (0.129–0.145),0.485,−0.809,tables/Table3.csv
+Table 3,"eICU-CRD BE (n=1,458, 363 events)",0.670 (0.638–0.703),0.179 (0.167–0.190),0.599,−0.486,tables/Table3.csv
+Table 3,"eICU-CRD HCO3 (n=2,287, 521 events)",0.670 (0.643–0.696),0.171 (0.162–0.180),0.619,−0.591,tables/Table3.csv
+Table 4,Internal Logistic,0.744,0.098,,,tables/Table4.csv
+Table 4,Internal RandomForest,0.748,0.096,,,tables/Table4.csv
+Table 4,Internal XGBoost,0.742,0.096,,,tables/Table4.csv
+Table 4,Internal LightGBM,0.720,0.098,,,tables/Table4.csv
+Table 4,Internal SVM,0.587,0.103,,,tables/Table4.csv
+Table 4,Internal MLP,0.445,0.162,,,tables/Table4.csv
+Table 4,External Python Logistic,0.620,0.166,,,tables/Table4.csv
+Table 4,External RandomForest,0.609,0.164,,,tables/Table4.csv
+Table 4,External XGBoost,0.603,0.164,,,tables/Table4.csv
+Table 4,External LightGBM,0.587,0.166,,,tables/Table4.csv
+Table 4,External SVM,0.502,0.170,,,tables/Table4.csv
+Table 4,External MLP,0.439,0.198,,,tables/Table4.csv
+Table 5,MIMIC-IV BE OOB Brier,,0.1596 [0.1492–0.1696],,,tables/Table5.csv
+Table 5,MIMIC-IV HCO3 OOB Brier,,0.1321 [0.1240–0.1403],,,tables/Table5.csv
+Table 5,eICU-CRD BE OOB Brier,,0.1739 [0.1692–0.1794],,,tables/Table5.csv
+Table 5,eICU-CRD HCO3 OOB Brier,,0.1638 [0.1598–0.1681],,,tables/Table5.csv
+Table S14,MIMIC-IV SOFA BE,0.613 vs 0.638,—,—,—,tables/TableS14.csv
+Table S14,MIMIC-IV SOFA HCO3,0.612 vs 0.642,—,—,—,tables/TableS14.csv
+Table S14,eICU APACHE BE,0.671 vs 0.727,—,—,—,tables/TableS14.csv
+Table S14,eICU APACHE HCO3,0.678 vs 0.739,—,—,—,tables/TableS14.csv

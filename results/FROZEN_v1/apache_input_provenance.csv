@@ -1,0 +1,6 @@
+file,path,exists,bytes,sha256
+external_validation_coef.csv,C:\Users\24339\Desktop\6.30呼吸衰竭\6.30呼衰\1.R数据预处理+变量筛选9.21\results\external_validation_coef.csv,True,191,5812366e3f94c2642b2bc5e51b5c642fd740594016e9f41361e7dbdd29fc01d3
+external_validation_coef_hco3.csv,C:\Users\24339\Desktop\6.30呼吸衰竭\6.30呼衰\1.R数据预处理+变量筛选9.21\results\external_validation_coef_hco3.csv,True,191,ac6669074627712d1b8f9b54b57fa765a7e29f9a3e4a4bf6fc6fa276af5d899b
+eicu_wide_be.csv,C:\Users\24339\Desktop\6.30呼吸衰竭\6.30呼衰\1.R数据预处理+变量筛选9.21\results\eicu_wide_be.csv,True,76214,0ff721f53e7f8b034e554732a411f6acf43faee2b9a628f698ef79f970d0a8a0
+eicu_wide_hco3.csv,C:\Users\24339\Desktop\6.30呼吸衰竭\6.30呼衰\1.R数据预处理+变量筛选9.21\results\eicu_wide_hco3.csv,True,120443,b14c75598d1bdab87203c4ae74c5f9693de4a17526e1aa98b6ae99ef162e4ea6
+apachePatientResult.csv.gz,D:\eicu2.0\apachePatientResult.csv.gz,True,17312631,f9870a5ad58b1519cf07f51cbe2717a8bf390f74159e2310e2bac3b6bb7a070a

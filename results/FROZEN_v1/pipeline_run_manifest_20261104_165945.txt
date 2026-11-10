@@ -1,0 +1,88 @@
+﻿AIC pipeline v6.2.10
+Run started: 20261104_165945
+ProjectBase  : C:\Users\24339\Desktop\6.30呼吸衰竭\6.30呼衰\1.R数据预处理+变量筛选9.21
+MimicWideCsv : D:\mimic_wide_with_hco3.csv
+MimicPath    : D:\mimic-iv-3.1
+SofaCsv      : D:\mimic-code\results\mimic_sofa_official.csv
+PythonExe    : C:\Users\24339\AppData\Local\Programs\Python\Python310\python.exe
+SkipSofa     : False
+SkipClosure  : False
+
+========== Pre-checks ==========
+[OK] Python 3.10.4
+[OK] Python path: C:\Users\24339\AppData\Local\Programs\Python\Python310\python.exe
+[OK] script present: ci_config.py
+[OK] script present: shared_calib.py
+[OK] script present: make_external_stats.py
+[OK] script present: run_model.py
+[OK] script present: fig2_be.py
+[OK] script present: figS2_hco3.py
+[OK] script present: recal_bootstrap.py
+[OK] script present: run_mimic_sofa_all.py
+[OK] script present: make_eicu_supp_tables.py
+[OK] script present: make_tables.py
+[OK] script present: check_v6_2_1.py
+[OK] script present: make_closure_report.py
+[OK] shared_calib.py is v1.3
+[OK] MIMIC wide SHA256 verified: b151612f75c568fce52f5a472206608682daaecd1a8ae2302595c45a0b3a72eb
+[OK] CI config: seed=20261101  n_boot=2000  method=percentile  level=0.95
+
+
+========== [1/10] run_model.py ==========
+started: 2026-11-04 16:59:45
+OK: run_model.py elapsed=23.3s
+
+========== [2/10] make_external_stats.py ==========
+started: 2026-11-04 17:00:08
+OK: make_external_stats.py elapsed=42.8s
+
+========== [3/10] fig2_be.py ==========
+started: 2026-11-04 17:00:51
+OK: fig2_be.py elapsed=5.5s
+
+========== [4/10] figS2_hco3.py ==========
+started: 2026-11-04 17:00:57
+OK: figS2_hco3.py elapsed=5.7s
+
+========== [5/10] recal_bootstrap.py ==========
+started: 2026-11-04 17:01:02
+OK: recal_bootstrap.py elapsed=27.1s
+
+========== [6/10] run_mimic_sofa_all.py ==========
+started: 2026-11-04 17:01:29
+OK: run_mimic_sofa_all.py elapsed=42.2s
+
+========== [7/10] make_eicu_supp_tables.py ==========
+started: 2026-11-04 17:02:12
+OK: make_eicu_supp_tables.py elapsed=2.9s
+
+========== [8/10] make_tables.py ==========
+started: 2026-11-04 17:02:15
+OK: make_tables.py elapsed=3.1s
+
+========== [9/10] check_v6_2_1.py ==========
+started: 2026-11-04 17:02:18
+OK: check_v6_2_1.py elapsed=1.3s
+
+========== [10/10] make_closure_report.py ==========
+started: 2026-11-04 17:02:19
+OK: make_closure_report.py elapsed=1.3s
+
+========== Artifact SHA256 ==========
+results\external_auc_stats.csv  63e7848e51f123352f9572133eac8fc15db74c29e1ebb14912555a46f7da5e74
+results\external_predictions.csv  4ec4f8fffda9390049cede598cde0bafeda1d8ef7a3d6f01ab56c613aafae880
+results\external_predictions_hco3_v2.csv  6797dd402ffc4d5e286d53c9f6f1f56cca3e3d68ee404e3ee5d1561d3bee9b3f
+results\mimic_prediction_manifest.csv  eee5b32451e68524e44541b4f8500fb0a46cc6305b5e15dbea4075192caa8232
+results\recal_summary_dual.csv  b79e08cc7b094a03a0aef550759bd517489cae8375e531f2e058e41559c39d56
+results\dca_results_dual.csv  209b29304ed523f4040a1dd25a7435550bda239967be4a672271f3869740c592
+results\mimic_sofa_vs_model.csv  ee5d0d86875fc2055d17ec712728daa0f8e54b8609589143d60a349d1a1d8a9f
+results\TableS6_this_study_row.csv  832536d575268109a3c7c208b3d0a1d4b52262dc38fdd176180244b4076b046a
+results\TableS13_eicu_alb_measured_vs_not.csv  fea3aca2a92efa23076158b6ae58e1d3295299d62a8076f1f74552580abd44ce
+tables\Table3.csv  e2199deda4c908d7c464bc9504fd7102a1377d935bc5e7fa4a203049d78ef9c6
+tables\Table4.csv  e3daff35e66e924d785a8951f7bfa56187fb00b51378b5031b0065d6318d371f
+tables\Table5.csv  7aaa3ced4a29bee71bc4ecdf1ee7c222da52b9db3066a6e0c73273ffaf15196f
+tables\TableS14.csv  08929e9297c15896b871e0aa1122348923b6a66c105ca1991eba763d93541d86
+
+========== Final summary ==========
+Run finished: 2026-11-04 17:02:20
+All 10 steps completed successfully.

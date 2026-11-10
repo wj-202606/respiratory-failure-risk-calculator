@@ -1,0 +1,15 @@
+cohort,subset,n,events,note
+Development,Total,2028.0,226.0,Full development cohort after MICE
+Development,Training,1420.0,154.0,"7:3 split, seed 123"
+Development,Internal validation,608.0,72.0,"7:3 split, seed 123"
+MIMIC-IV,BE complete-case,434.0,88.0,"dropna on ALB, BUN, BE, outcome"
+MIMIC-IV,HCO3 complete-case,684.0,109.0,"dropna on ALB, BUN, HCO3, outcome"
+MIMIC-IV,Full cohort,2456.0,,after inclusion criteria
+MIMIC-IV,SOFA BE subset,393.0,85.0,with first-day SOFA available
+MIMIC-IV,SOFA HCO3 subset,467.0,103.0,with first-day SOFA available
+MIMIC-IV,APACHE not applicable,,,APACHE IVa only in eICU
+eICU-CRD,BE complete-case,1458.0,363.0,Plan B: ICU-admission time origin
+eICU-CRD,HCO3 complete-case,2287.0,521.0,Plan B: ICU-admission time origin
+eICU-CRD,Full eligible,4696.0,977.0,before complete-case drop
+eICU-CRD,APACHE BE subset,1136.0,273.0,"with APACHE IVa prediction in [0,1]"
+eICU-CRD,APACHE HCO3 subset,1722.0,387.0,"with APACHE IVa prediction in [0,1]"

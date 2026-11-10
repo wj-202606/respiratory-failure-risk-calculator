@@ -1,0 +1,75 @@
+FINAL VALIDATION REPORT — v6.2.10
+======================================================================
+Generated: 2026-11-06T09:34:31
+
+1. Version
+   v6.2.10 (frozen 2026-11-04)
+
+2. Pipeline run
+   results/pipeline_run_manifest_20261104_163126.txt
+   10 steps completed successfully at 2026-11-04 17:02:20
+
+3. MIMIC wide table
+   SHA256: b151612f75c568fce52f5a472206608682daaecd1a8ae2302595c45a0b3a72eb
+   Size: 2,456 rows x 8 columns; 684 rows with HCO3
+
+4. Frozen coefficient files
+   external_validation_coef.csv       BE  : see coefficient_audit.csv
+   external_validation_coef_hco3.csv  HCO3: see coefficient_audit.csv
+
+5. Sample sizes
+   Development: 2,028 (226 deaths)
+   Training: 1,420 (154 deaths)
+   Internal validation: 608 (72 deaths)
+   MIMIC-IV BE complete-case: 434 (88 deaths)
+   MIMIC-IV HCO3 complete-case: 684 (109 deaths)
+   eICU-CRD BE complete-case: 1,458 (363 deaths)
+   eICU-CRD HCO3 complete-case: 2,287 (521 deaths)
+
+6. Key performance
+   Internal validation AUC: 0.727 (SD 0.006) across 50 imputations
+   Internal calibration slope: 0.797; intercept: -0.356
+   100-split median AUC: 0.751 (IQR 0.731-0.772)
+   MIMIC-IV BE AUC: 0.620 (95% CI 0.555-0.681), Brier 0.166, slope 0.410, intercept -0.637
+   MIMIC-IV HCO3 AUC: 0.642 (0.588-0.700), Brier 0.137, slope 0.485, intercept -0.809
+   eICU-CRD BE AUC: 0.670 (0.638-0.703), Brier 0.179, slope 0.599, intercept -0.486
+   eICU-CRD HCO3 AUC: 0.670 (0.643-0.696), Brier 0.171, slope 0.619, intercept -0.591
+
+7. Direction audit
+   pROC::auc direction fixed to '<' at three AUC sites
+   direction_audit: 5,000 rows (100 splits x 50 imputations), 0 flips
+
+8. Bootstrap valid counts
+   n_boot = 2,000 per metric per model
+   All 4 metrics (AUC, Brier, slope, intercept) x 2 models = 8 x 2,000 valid
+
+9. APACHE IVa comparison (eICU-CRD)
+   BE  : 3-variable 0.671 (0.633-0.709) vs APACHE 0.727 (0.693-0.761);
+         delta AUC -0.056 (95% CI -0.098 to -0.015), p = 0.009, n = 1,136
+   HCO3: 3-variable 0.678 (0.647-0.708) vs APACHE 0.739 (0.711-0.767);
+         delta AUC -0.062 (95% CI -0.096 to -0.028), p < 0.001, n = 1,722
+
+10. SOFA comparison (MIMIC-IV)
+    BE  : 3-variable 0.613 (0.547-0.680) vs SOFA 0.638 (0.570-0.705);
+          delta AUC -0.025 (95% CI -0.092 to 0.044), p = 0.485, n = 393
+    HCO3: 3-variable 0.612 (0.551-0.671) vs SOFA 0.642 (0.580-0.701);
+          delta AUC -0.029 (95% CI -0.102 to 0.035), p = 0.394, n = 467
+
+11. Closure report
+    results/mimic_hco3_closure_report.txt
+    Status: CLOSED (16/16 checks passed)
+
+12. This audit package
+    submission_audit/
+      R_VERSION.txt
+      analysis_manifest.csv
+      SHA256SUMS.txt
+      sample_size_audit.csv
+      coefficient_audit.csv
+      prediction_provenance.csv
+      table_number_audit.csv
+      figure_number_audit.csv
+      final_validation_report.txt
+      change_log.txt
+
+End of report.

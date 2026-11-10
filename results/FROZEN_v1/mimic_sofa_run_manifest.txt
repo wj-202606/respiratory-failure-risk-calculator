@@ -1,0 +1,29 @@
+MIMIC SOFA run manifest
+Generated: 2026-11-05T17:53:36
+
+Input/output SHA256:
+  SOFA official CSV
+    path   = D:\mimic-code\results\mimic_sofa_official.csv
+    sha256 = 488e3123795fcaf7aa2b7e7814162346eff469a3ff788b8111ef6be544e02eb5
+  icustays
+    path   = D:\mimic-iv-3.1\icu\icustays.csv.gz
+    sha256 = 3c590ed37f1fb7a77a128f2f6961f836001512ba81adcd0dfeced2702f96bc5f
+  BE predictions
+    path   = results/external_predictions.csv
+    sha256 = 4ec4f8fffda9390049cede598cde0bafeda1d8ef7a3d6f01ab56c613aafae880
+  HCO3 predictions
+    path   = results/external_predictions_hco3_v2.csv
+    sha256 = 6797dd402ffc4d5e286d53c9f6f1f56cca3e3d68ee404e3ee5d1561d3bee9b3f
+  sofa_vs_model
+    path   = results/mimic_sofa_vs_model.csv
+    sha256 = ee5d0d86875fc2055d17ec712728daa0f8e54b8609589143d60a349d1a1d8a9f
+  merge_diagnostics
+    path   = results/mimic_sofa_merge_diagnostics.csv
+    sha256 = 3089f04c0cbd75b0ce7d4471fa76f05e0ba3a1a4c1a8365a31b5e3c4716b33ec
+  input_provenance
+    path   = results/mimic_sofa_input_provenance.csv
+    sha256 = c16c6edb378c1e8e2431afcf7a88134034b90820c4dc0a9ec65d9c0b6dd76fc3
+
+Result summary (from mimic_sofa_vs_model.csv):
+  BE: n=393, events=85, AUC_model=0.6130 (0.5466-0.6798), AUC_sofa=0.6380 (0.5696-0.7045), delta_AUC=-0.0250 (-0.0923 to +0.0442), DeLong p=0.484970
+  HCO3: n=467, events=103, AUC_model=0.6123 (0.5511-0.6711), AUC_sofa=0.6416 (0.5801-0.7014), delta_AUC=-0.0292 (-0.1023 to +0.0348), DeLong p=0.393989

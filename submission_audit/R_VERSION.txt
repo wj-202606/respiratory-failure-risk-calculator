@@ -1,0 +1,24 @@
+R analysis environment
+======================
+Generated: 2026-11-06T09:34:31
+
+R_analysis_v5_4_1.R
+  Pipeline version: v5.4.1
+  R version: R version 4.5.1
+  Packages used: naniar, mice, tableone, ggplot2, lattice, caret,
+                 autoReg, dplyr, Matrix, glmnet, Boruta, Hmisc,
+                 rms, car, pROC, e1071, boot, dcurves
+
+Global seed: 123
+Outer 7:3 split seed: 123
+Imputation seed: 123 (train and combined train+val)
+LASSO loop seed: 123 + imp_i (imp_i in 1..50)
+100-split seed: 1:100
+Bootstrap seed: 123
+
+AUC direction: fixed to '<' (positive-probability-positive)
+  in pROC::auc calls at the 50-imputation train AUC, the
+  50-imputation internal-validation AUC, and the 100-split AUC.
+  direction_audit (5,000 AUC calculations): 0 flips.
+
+Environment file: results/run_manifest_v54.txt

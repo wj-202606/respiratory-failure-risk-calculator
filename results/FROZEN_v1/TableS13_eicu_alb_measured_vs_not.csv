@@ -1,6 +1,6 @@
-Variable,ALB measured (n = 2540),ALB not measured (n = 2554),SMD,P value
-"Age, years, mean (SD)",64.4 (16.1),66.3 (15.9),0.12,0.000
-"Male, %",1303 (51.3),1226 (48.0),0.07,0.020
-"BUN, mmol/L, mean (SD)",11.2 (8.2),9.9 (7.1),0.17,0.000
-"BE, mmol/L, mean (SD)",-0.1 (7.3),2.1 (7.1),0.31,0.000
-"In-hospital mortality, %",553 (21.8),457 (17.9),0.10,0.001
+Variable,ALB measured (n = 2390),ALB not measured (n = 2306),SMD,P value
+"Age, years, mean (SD)",64.5 (16.1),66.3 (15.7),0.11,<0.001
+"Male, %",1239 (51.8),1112 (48.2),0.07,0.014
+"BUN, mmol/L, mean (SD)",11.4 (8.2),10.1 (7.2),0.16,<0.001
+"BE, mmol/L, mean (SD)",-0.2 (7.4),2.0 (7.1),0.31,<0.001
+"In-hospital death, n (%)",543 (22.7),434 (18.8),0.10,0.001

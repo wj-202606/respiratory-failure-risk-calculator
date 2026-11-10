@@ -1,0 +1,7 @@
+﻿Variable,ALB measured,ALB not measured,SMD,P value
+n,684,1772,,
+"Age, years, mean (SD)",64.9 (15.5),65.5 (15.3),0.04,0.375
+"Male, %",54.8,48.4,0.13,0.005
+"BUN, mmol/L, mean (SD)",9.46 (7.12),8.41 (6.19),0.16,<0.001
+"BE, mmol/L, mean (SD)",0.44 (6.48),1.35 (5.31),0.15,0.013
+"In-hospital mortality, %",15.9,8.0,0.25,<0.001

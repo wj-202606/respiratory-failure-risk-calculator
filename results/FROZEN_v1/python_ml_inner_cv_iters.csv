@@ -1,0 +1,11 @@
+Model,fold,best_iter
+XGBoost,1,43
+XGBoost,2,114
+XGBoost,3,99
+XGBoost,4,93
+XGBoost,5,74
+LightGBM,1,67
+LightGBM,2,234
+LightGBM,3,90
+LightGBM,4,82
+LightGBM,5,154

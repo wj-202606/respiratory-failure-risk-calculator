@@ -1,0 +1,421 @@
+AIC scripts v6.2.9
+Build date: 2026-11-04
+Base package: AIC_scripts_v6_2_complete.zip
+R base: R_analysis_v5_4_1.R
+Python base: v6.2.9 (v6.2.8 + unified CI + Figure S2 regenerated
+             + Table S6 / S13 fixes)
+
+============================================================
+Summary
+============================================================
+v6.2.9 closes the pre-submission audit items that remained open
+after v6.2.8. No model was refitted; no prediction probabilities
+were changed; only the source of the reported confidence intervals
+was unified, one figure was regenerated, two table cells were
+corrected, and one syntax error in run_model.py was fixed.
+
+Single source of truth: results/external_auc_stats.csv. Figure 2,
+Figure S2, Table 3, and Table S6 all read AUC / Brier / calibration
+values and CIs from this file. Any hard-coded AUC value in a figure
+or table is a defect.
+
+Reported AUC CIs with CI_SEED = 20261101:
+
+  Model  n    events  AUC     AUC 95% CI        Brier    Brier 95% CI
+  BE     434  88      0.6204  0.553 - 0.688     0.1661   0.140 - 0.193
+  HCO3   684  109     0.6423  0.586 - 0.695     0.1368   0.118 - 0.155
+
+These supersede the v6.2.8 figures:
+  BE  : 0.554 - 0.683  ->  0.553 - 0.688
+  HCO3: 0.589 - 0.696  ->  0.586 - 0.695
+
+Canonical value:
+  EXPECTED_MIMIC_SHA256 =
+    b151612f75c568fce52f5a472206608682daaecd1a8ae2302595c45a0b3a72eb
+  MIMIC wide file: D:\mimic_wide_with_hco3.csv
+  Size: 2456 rows x 8 columns, 684 rows with HCO3.
+  Closure timestamp: 2026-11-04T14:13:55
+  Status: CLOSED
+
+============================================================
+Fix log
+============================================================
+v6.2.1 (2026-11-04)
+  [1] run_model.py: XGBoost early stopping
+      - new fit_xgb_with_early_stopping() with three-layer fallback
+        (fit early_stopping_rounds -> set_params -> callbacks)
+      - best_iteration checked explicitly; 0-based converted to +1
+      - final model refit on full training set with 5-fold median n_estimators
+      - inner-CV fold iters written to results/python_ml_inner_cv_iters.csv
+  [2] compare_eicu_apache.py: APACHE IVa duplicate / merge audit
+      - predictedhospitalmortality checked within [0, 1] after excluding -1
+      - duplicate stay_id with conflicting predicted values -> stop + write
+        results/apache_duplicate_conflicts.csv
+      - merge changed from inner to outer + indicator
+      - n_model_without_apache / n_apache_without_model / n_matched reported
+      - DeLong computed only on matched (both) subset
+
+v6.2.2 (2026-11-04)
+  [1] run_model.py: HCO3 frozen predictions skipped if mimic_wide.csv
+      has no HCO3 column (no error)
+  [2] recal_bootstrap.py: HCO3 skipped if external_predictions_hco3_v2.csv
+      does not exist
+  [3] run_mimic_sofa_all.py: HCO3 SOFA comparison skipped if HCO3
+      prediction file does not exist
+  [4] compare_eicu_apache.py: -1 treated as missing; apache_pred_prob
+      assigned directly (no /100)
+  [5] make_eicu_supp_tables.py: removed DEV['n'] vs eICU full-cohort
+      assertion (two independent cohorts)
+
+v6.2.3 (2026-11-04)
+  [1] check_v6_2_1.py: mimic_prediction_manifest.csv HCO3 row made optional
+  [2] make_tables.py: Table 3 / Table 5 MIMIC-IV HCO3 rows made optional
+      (not available when predictions are absent)
+
+v6.2.4 (2026-11-04)
+  [1] make_tables.py: Table 3 / Table 5 MIMIC-IV HCO3 footnote made
+      conditional on has_hco3_mimic
+
+v6.2.5 (2026-11-04)
+  [1] compare_eicu_apache.py: added independent AUC 95% CI
+      (bootstrap_auc_ci) for AUC_model and AUC_apache
+  [2] run_mimic_sofa_all.py: added independent AUC 95% CI
+      (bootstrap_auc_ci) for AUC_model and AUC_sofa
+
+v6.2.6 (2026-11-04)
+  [1] make_tables.py: added build_tableS14() generating TableS14.csv and
+      TableS14.md from mimic_sofa_vs_model.csv and apache_delong_results.csv
+
+v6.2.7 (2026-11-04)
+  [1] make_tables.py: Table S14 n column formatted with thousands separator
+
+v6.2.8 (2026-11-04)
+  [1] run_model.py
+      - added EXPECTED_MIMIC_SHA256 constant
+        (b151612f75c568fce52f5a472206608682daaecd1a8ae2302595c45a0b3a72eb)
+      - added assert_mimic_wide_locked(path): computes SHA256 of
+        D:\mimic_wide_with_hco3.csv, compares against EXPECTED_MIMIC_SHA256,
+        and exits with a FATAL message if they differ. Runs before any
+        modeling or prediction step.
+      - mimic_prediction_manifest.csv gains 3 columns:
+          mimic_n_rows  (2456)
+          mimic_n_cols  (8)
+          hco3_source   ("not_used_by_BE" for BE row;
+                         "mimic_wide_with_hco3.csv column=hco3_mmol_l"
+                         for HCO3 row)
+      - no change to any model, coefficient, prediction, or figure.
+
+  [2] recal_bootstrap.py
+      - added EXPECTED_MIMIC_SHA256 constant (same value as run_model.py)
+      - added assert_mimic_wide_locked(path): same hard SHA256 guard,
+        runs before loading any prediction file.
+      - load_pred() now prints a "prediction file validated" line after
+        passing the coef_sha256 / mimic_sha256 checks.
+      - mimic_recal_input_manifest.csv gains 2 columns:
+          role             ("prediction" / "coef" / "mimic_wide")
+          expected_sha256  (populated for the mimic_wide row, empty
+                            otherwise)
+      - no change to any recalibration, OOB, or DCA computation.
+
+  [3] run_mimic_sofa_all.py
+      - NOT MODIFIED. Already validates coef_sha256, mimic_sha256,
+        hadm_id uniqueness, and outcome / pred_prob legality in
+        validate_prediction_file().
+
+  [4] New file: make_closure_report.py (v1.0)
+      - Read-only. Loads no model, writes no prediction.
+      - Reads D:\mimic_wide_with_hco3.csv, results/mimic_prediction_manifest.csv
+      - Writes results/mimic_hco3_closure_report.txt with:
+          * generated timestamp
+          * MIMIC wide path, SHA256, rows, cols, rows-with-HCO3
+          * hash match against EXPECTED_MIMIC_SHA256
+          * per-model n / events / coef prefix / mimic prefix /
+            model_version from the manifest
+          * historical provenance (HCO3 source, ALB/BUN max|diff|)
+          * final status (CLOSED)
+      - This file is the human-readable record of the HCO3 source
+        closure. It is meant to travel with the frozen predictions.
+
+v6.2.9 (2026-11-04)  <-- this release
+  [1] Unified AUC / Brier confidence interval settings
+      CI_SEED   = 20261101
+      N_BOOT_CI = 2000
+      CI_METHOD = percentile
+      CI_LEVEL  = 0.95
+      MIN_VALID_BOOT = 1900
+      New module ci_config.py; all scripts import from it.
+
+  [2] New single source of truth
+      make_external_stats.py (v1.0, new) writes
+        results/external_auc_stats.csv
+      containing per model (BE, HCO3):
+        n, events, AUC, Brier, slope, intercept (full precision),
+        AUC / Brier / slope / intercept 95% CIs (3 decimals),
+        n_boot, n_boot_valid, ci_seed, ci_method, ci_level,
+        min_valid_boot, sampling_scheme, pred_file, pred_sha256
+
+  [3] Explicit CI source for all figures and tables
+      - run_model.py : Figure 2 AUC CI read from
+        external_auc_stats.csv; also fixed line 47 (mojibake
+        "论文图" -> correct UTF-8 string literal).
+      - figS2_hco3.py (v2.0, rewritten): Figure S2 read from
+        external_predictions_hco3_v2.csv; CI read from
+        external_auc_stats.csv; hard-coded coefficients and the
+        old mimic_wide_hco3.csv path removed.
+      - make_tables.py : Table 3 MIMIC BE / HCO3 rows read
+        AUC_lo / AUC_hi / Brier_lo / Brier_hi from
+        external_auc_stats.csv; local bootstrap_ci_auc_brier no
+        longer called for MIMIC rows.
+      - make_eicu_supp_tables.py : Table S6 Discrimination (AUC)
+        cell reports explicit MIMIC-IV AUC read from
+        external_auc_stats.csv.
+
+  [4] Figure S2 regenerated from the frozen 684-case HCO3 file
+      Previous Figure S2 had been generated from an older HCO3
+      prediction file and a hard-coded coefficient set. v6.2.9
+      regenerates it from results/external_predictions_hco3_v2.csv
+      (SHA256 b151612f...) using the same frozen predictions as
+      Table 3.
+
+  [5] Table S13 label
+      "In-hospital mortality, %" -> "In-hospital death, n (%)".
+      Numerical values unchanged (543 (22.7) vs 434 (18.8);
+      P = 0.001). Matches Table S11 and Table S12.
+
+  [6] Table S6 MIMIC-IV discrimination cell
+      Previously: "MIMIC-IV see Figure 2 / Figure S2"
+      Now       : "MIMIC-IV AUC 0.620 (BE) and 0.642 (HCO3);
+                   eICU-CRD 0.670 (BE); 0.670 (HCO3)"
+      Values read from external_auc_stats.csv and the eICU summary
+      files; no hard-coded literals.
+
+  [7] run_pipeline_v6_2_9.ps1 (new)
+      - Default MimicWideCsv = D:\mimic_wide_with_hco3.csv
+      - ExpectedMimicSha256 guard at startup
+      - CI config printed at startup
+      - Sequence:
+          make_external_stats.py
+          run_model.py
+          figS2_hco3.py
+          recal_bootstrap.py
+          run_mimic_sofa_all.py   (skippable via -SkipSofa)
+          make_eicu_supp_tables.py
+          make_tables.py
+          check_v6_2_1.py
+          make_closure_report.py  (skippable via -SkipClosureReport)
+      - Writes results/pipeline_run_manifest_<timestamp>.txt
+        with per-step elapsed time / exit code and artifact SHA256.
+
+============================================================
+Frozen results (not re-run after v6.2.1)
+============================================================
+The following outputs were produced by R_analysis_v5_4_1.R and are
+not changed by v6.2.1-v6.2.9:
+  - results/external_validation_coef.csv
+  - results/external_validation_coef_hco3.csv
+  - results/summary_for_manuscript_v5.csv
+  - results/internal_validation_50imp_v5.csv
+  - results/auc_100splits_v5.csv
+  - results/traindata_descriptive.csv
+  - results/valdata_descriptive.csv
+
+Note on results/dev_full_baseline.csv:
+  The file produced by R_analysis_v5_3.R (which did not export
+  hco3_mean / hco3_sd) was supplemented manually. The two values
+  (hco3_mean = 29.045956607495068, hco3_sd = 8.032437225219994)
+  were computed from results/traindata_descriptive.csv +
+  results/valdata_descriptive.csv (first imputation, n = 2,028),
+  which is the same input used by the 6b section of
+  R_analysis_v5_4_1.R. The supplement is documented in
+  results/dev_full_baseline_supplement_note.txt.
+
+============================================================
+Scripts and their roles
+============================================================
+R_analysis_v5_4_1.R
+  Development cohort MICE, LASSO, Rubin's rules, internal validation,
+  frozen coefficients, 100-split reuse (RUN_100_SPLITS = FALSE),
+  dev baseline export.
+  Outputs: results/external_validation_coef*.csv,
+           results/dev_full_baseline.csv,
+           results/summary_for_manuscript_v5.csv,
+           results/internal_validation_50imp_v5.csv,
+           results/auc_100splits_v5.csv,
+           results/traindata_descriptive.csv,
+           results/valdata_descriptive.csv
+
+ci_config.py (v1.0, NEW in v6.2.9)
+  Unified bootstrap parameters for all CI computations.
+  CI_SEED = 20261101, N_BOOT_CI = 2000, CI_METHOD = percentile,
+  CI_LEVEL = 0.95, MIN_VALID_BOOT = 1900.
+  Every script that computes a CI must import from this module.
+
+make_external_stats.py (v1.0, NEW in v6.2.9)
+  Single source of truth for external-validation statistics.
+  Outputs: results/external_auc_stats.csv
+           results/external_auc_stats.json
+
+run_model.py (v6.2.9)
+  MIMIC BE and HCO3 frozen predictions with SHA256 of coefficients
+  and mimic_wide.csv; five ML algorithms with inner-CV early stopping;
+  paired DeLong; SHAP; Figure 2.
+  Figure 2 AUC CI is read from external_auc_stats.csv (v6.2.9).
+  Outputs: results/external_predictions.csv,
+           results/external_predictions_hco3_v2.csv,
+           results/python_model_comparison.csv,
+           results/python_ml_inner_cv_iters.csv,
+           results/python_external_validation.csv,
+           results/delong_paired_results.csv,
+           results/mimic_prediction_manifest.csv (with mimic_n_rows,
+             mimic_n_cols, hco3_source),
+           论文图/Figure2_external_ROC_calibration.pdf,
+           论文图/FigureS3_SHAP_summary.pdf,
+           论文图/FigureS3b_SHAP_bar.pdf
+
+figS2_hco3.py (v2.0, rewritten in v6.2.9)
+  Figure S2 ROC + calibration, read from
+  results/external_predictions_hco3_v2.csv with CI from
+  results/external_auc_stats.csv.
+  Outputs: 论文图/FigureS2_hco3_ROC_calibration.pdf
+
+recal_bootstrap.py (v6.2.8, unchanged in v6.2.9)
+  MIMIC recalibration, bootstrap OOB, DCA; Figure 3, Figure S4.
+  Outputs: results/recal_summary_dual.csv,
+           results/recal_bootstrap_summary.csv,
+           results/recal_bootstrap_BE.csv,
+           results/recal_bootstrap_HCO3.csv,
+           results/recal_calib_method_check.csv,
+           results/dca_results_dual.csv,
+           results/mimic_recal_input_manifest.csv (with role and
+             expected_sha256),
+           results/calib_manifest.txt,
+           论文图/Figure3_DCA.pdf,
+           论文图/FigureS4_recalibration.pdf
+
+run_mimic_sofa_all.py (v2.5, unchanged)
+  MIMIC first-day SOFA comparison (official first_day_sofa).
+  Outputs: results/mimic_sofa_vs_model.csv,
+           results/mimic_sofa_merge_diagnostics.csv,
+           results/mimic_sofa_input_provenance.csv
+
+eicu_build_wide.py (v6.0, unchanged)
+  eICU cohort construction (BE / HCO3 / full cohort).
+  Outputs: results/eicu_wide_be.csv,
+           results/eicu_wide_hco3.csv,
+           results/eicu_full_cohort_v2.csv
+
+eicu_validate.py (v6.0, unchanged)
+  eICU external validation; Figure S6, S7, S8.
+  Outputs: results/eicu_be_summary.csv,
+           results/eicu_hco3_summary.csv,
+           results/eicu_predictions_be.csv,
+           results/eicu_predictions_hco3.csv,
+           results/eicu_dca.csv,
+           论文图/FigureS6_eicu_ROC_calibration.pdf,
+           论文图/FigureS7_eicu_hco3_ROC_calibration.pdf,
+           论文图/FigureS8_eicu_DCA.pdf
+
+compare_eicu_apache.py (v6.2.5, unchanged)
+  eICU APACHE IVa comparison; -1 treated as missing; outer merge;
+  paired DeLong; independent AUC CI and paired delta-AUC CI.
+  Outputs: results/apache_delong_results.csv,
+           results/apache_merge_diagnostics.csv,
+           results/apache_input_provenance.csv
+
+make_eicu_supp_tables.py (v6.2.9)
+  eICU supplementary tables S6, S7b, S11, S12, S13.
+  v6.2.9: Table S6 Discrimination (AUC) cell reports explicit MIMIC-IV
+          AUC read from external_auc_stats.csv;
+          Table S13 mortality row label changed from
+          "In-hospital mortality, %" to "In-hospital death, n (%)".
+  Outputs: results/TableS6_this_study_row.csv,
+           results/TableS7b_dev_vs_eicu.csv,
+           results/TableS11_eicu_baseline.csv,
+           results/TableS12_eicu_incl_vs_excl.csv,
+           results/TableS13_eicu_alb_measured_vs_not.csv,
+           results/eicu_supp_input_provenance.csv
+
+make_tables.py (v6.2.9)
+  Main tables and Table S14.
+  v6.2.9: Table 3 MIMIC BE / HCO3 AUC and Brier CI read from
+          external_auc_stats.csv; local bootstrap_ci_auc_brier no
+          longer called for MIMIC rows.
+  Outputs: tables/Table3.csv, tables/Table3.md,
+           tables/Table4.csv, tables/Table4.md,
+           tables/Table5.csv, tables/Table5.md,
+           tables/Table6a.csv, tables/Table6a.md,
+           tables/Table6b.csv, tables/Table6b.md,
+           tables/TableS12.csv, tables/TableS12.md,
+           tables/TableS14.csv, tables/TableS14.md
+
+check_v6_2_1.py (v6.2.3, unchanged)
+  Verification of APACHE duplicate audit, XGBoost early stopping,
+  independent AUC CI, and delta-AUC CI.
+  Run before using manuscript tables.
+
+make_closure_report.py (v1.0, unchanged)
+  Read-only. Generates results/mimic_hco3_closure_report.txt from
+  D:\mimic_wide_with_hco3.csv and results/mimic_prediction_manifest.csv.
+  Outputs: results/mimic_hco3_closure_report.txt
+
+run_pipeline_v6_2_9.ps1 (v6.2.9, NEW)
+  PowerShell driver for the v6.2.9 sequence with SHA256 guard,
+  CI config print, and per-run manifest.
+  Outputs: results/pipeline_run_manifest_<timestamp>.txt
+
+============================================================
+Figure files
+============================================================
+论文图/Figure1_flowchart.pdf                    (not re-generated)
+论文图/Figure2_external_ROC_calibration.pdf     (v6.2.9, CI from external_auc_stats.csv)
+论文图/Figure3_DCA.pdf                          (v6.2.2)
+论文图/FigureS1_internal_ROC_calibration.pdf    (v6.2.0 script, 50-imp mean)
+论文图/FigureS2_hco3_ROC_calibration.pdf        (v6.2.9, regenerated)
+论文图/FigureS3_SHAP_summary.pdf                (v6.2.1)
+论文图/FigureS3b_SHAP_bar.pdf                   (v6.2.1)
+论文图/FigureS4_recalibration.pdf               (v6.2.2)
+论文图/FigureS5_AUC_distribution.pdf            (R_analysis_v5_3.R, full pipeline)
+论文图/FigureS6_eicu_ROC_calibration.pdf        (v6.0)
+论文图/FigureS7_eicu_hco3_ROC_calibration.pdf   (v6.0)
+论文图/FigureS8_eicu_DCA.pdf                    (v6.0)
+
+============================================================
+Reproducibility
+============================================================
+Run order (v6.2.9):
+  1. R_analysis_v5_4_1.R (RUN_100_SPLITS = FALSE)
+  2. eicu_build_wide.py
+  3. eicu_validate.py
+  4. compare_eicu_apache.py
+  5. make_external_stats.py        <-- NEW in v6.2.9
+  6. run_model.py
+  7. figS2_hco3.py                 <-- NEW in v6.2.9
+  8. recal_bootstrap.py
+  9. run_mimic_sofa_all.py
+ 10. make_eicu_supp_tables.py
+ 11. make_tables.py
+ 12. check_v6_2_1.py
+ 13. make_closure_report.py
+
+Steps 1-4 can be skipped when results/ already contains valid
+external_validation_coef*.csv, eicu_*.csv, and apache_*.csv.
+Steps 5-13 are the minimum required to regenerate Figure 2,
+Figure S2, Table 3, Table S6, Table S13, and the closure report.
+
+PowerShell driver: run_pipeline_v6_2_9.ps1
+  - Default MimicWideCsv = D:\mimic_wide_with_hco3.csv
+  - ExpectedMimicSha256 guard
+  - Prints CI_SEED / N_BOOT_CI / CI_METHOD / CI_LEVEL at startup
+  - Writes results/pipeline_run_manifest_<timestamp>.txt
+
+If the MIMIC wide file is intentionally replaced:
+  1. Update EXPECTED_MIMIC_SHA256 in run_model.py
+  2. Update EXPECTED_MIMIC_SHA256 in recal_bootstrap.py
+  3. Update ExpectedMimicSha256 in run_pipeline_v6_2_9.ps1
+  4. Update this VERSION file
+  5. Re-run steps 5-13 and archive the new closure report
+Failure to update all four places will cause the guard to abort
+with FATAL, which is the intended behavior.
+
+Real MIMIC-IV / eICU-CRD execution: completed on the user's local
+environment. Raw patient-level data are not redistributed.

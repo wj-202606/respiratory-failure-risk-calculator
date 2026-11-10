@@ -1,0 +1,5 @@
+file,path,exists,bytes,sha256
+mimic_sofa_official.csv,D:\mimic-code\results\mimic_sofa_official.csv,True,3770785,488e3123795fcaf7aa2b7e7814162346eff469a3ff788b8111ef6be544e02eb5
+external_predictions.csv,C:\Users\24339\Desktop\6.30呼吸衰竭\6.30呼衰\1.R数据预处理+变量筛选9.21\results\external_predictions.csv,True,85492,4ec4f8fffda9390049cede598cde0bafeda1d8ef7a3d6f01ab56c613aafae880
+external_predictions_hco3_v2.csv,C:\Users\24339\Desktop\6.30呼吸衰竭\6.30呼衰\1.R数据预处理+变量筛选9.21\results\external_predictions_hco3_v2.csv,True,134666,6797dd402ffc4d5e286d53c9f6f1f56cca3e3d68ee404e3ee5d1561d3bee9b3f
+icustays.csv.gz,D:\mimic-iv-3.1\icu\icustays.csv.gz,True,3342355,3c590ed37f1fb7a77a128f2f6961f836001512ba81adcd0dfeced2702f96bc5f

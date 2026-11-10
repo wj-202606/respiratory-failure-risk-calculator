@@ -1,0 +1,43 @@
+Model,Parameter,Value
+GLOBAL,random_seed,123
+GLOBAL,python_version,3.10.4
+GLOBAL,sklearn_version,see environment
+GLOBAL,run_model_py_version,v6.2.10
+Logistic,C,1.0
+Logistic,penalty,l2
+Logistic,max_iter,2000
+RandomForest,n_estimators,500
+RandomForest,max_depth,6
+RandomForest,min_samples_leaf,10
+XGBoost,n_estimators_max,1000
+XGBoost,learning_rate,0.03
+XGBoost,max_depth,3
+XGBoost,subsample,0.8
+XGBoost,colsample_bytree,0.8
+XGBoost,reg_lambda,1.0
+XGBoost,reg_alpha,0.1
+XGBoost,early_stopping_rounds,50
+XGBoost,final_n_estimators,"93 (median of [43, 114, 99, 93, 74])"
+XGBoost,inner_cv_folds,5
+XGBoost,inner_cv_seed,123
+LightGBM,n_estimators_max,1000
+LightGBM,learning_rate,0.03
+LightGBM,max_depth,3
+LightGBM,num_leaves,8
+LightGBM,min_child_samples,20
+LightGBM,subsample,0.8
+LightGBM,colsample_bytree,0.8
+LightGBM,reg_lambda,1.0
+LightGBM,early_stopping_rounds,50
+LightGBM,final_n_estimators,"90 (median of [67, 234, 90, 82, 154])"
+LightGBM,inner_cv_folds,5
+LightGBM,inner_cv_seed,123
+SVM,kernel,rbf
+SVM,C,1.0
+SVM,gamma,scale
+SVM,probability,True
+MLP,hidden_layer_sizes,"(32, 16)"
+MLP,alpha,1e-3
+MLP,max_iter,2000
+MLP,early_stopping,True
+MLP,validation_fraction,0.15

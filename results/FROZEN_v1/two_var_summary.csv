@@ -1,0 +1,3 @@
+Model,n,events,AUC,Brier,Slope,Intercept
+Two-variable (ALB fixed at mean),1169,182,0.5856,0.1321,0.6039,-0.4059
+Three-variable (complete cases),434,88,0.6204,0.1661,0.41,-0.6369

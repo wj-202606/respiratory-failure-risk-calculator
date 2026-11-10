@@ -1,0 +1,2 @@
+Model / Study,Population,Derivation n,External validation,Discrimination (AUC),Calibration reported,Recalibration performed
+This study (ALB + BUN + BE; HCO3 sensitivity),Respiratory failure (J96),"2,028","Yes (MIMIC-IV, n = 434; eICU-CRD, n = 1,458 BE / 2,287 HCO3)",MIMIC-IV 见 Figure 2; eICU-CRD 0.670 (eICU-CRD BE); 0.670 (eICU-CRD HCO3),"Yes (slope, intercept, bootstrap OOB)",Yes (slope + intercept)

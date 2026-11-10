@@ -1,0 +1,9 @@
+file,path,exists,bytes,sha256
+eicu_wide_be.csv,C:\Users\24339\Desktop\6.30呼吸衰竭\6.30呼衰\1.R数据预处理+变量筛选9.21\results\eicu_wide_be.csv,True,76214,0ff721f53e7f8b034e554732a411f6acf43faee2b9a628f698ef79f970d0a8a0
+eicu_wide_hco3.csv,C:\Users\24339\Desktop\6.30呼吸衰竭\6.30呼衰\1.R数据预处理+变量筛选9.21\results\eicu_wide_hco3.csv,True,120443,b14c75598d1bdab87203c4ae74c5f9693de4a17526e1aa98b6ae99ef162e4ea6
+eicu_full_cohort_v2.csv,C:\Users\24339\Desktop\6.30呼吸衰竭\6.30呼衰\1.R数据预处理+变量筛选9.21\results\eicu_full_cohort_v2.csv,True,314758,f26e1b907dd83ffe54c097b84cc43667ad6a5dd021c19bb9110c7ce20eab85a7
+dev_full_baseline.csv,C:\Users\24339\Desktop\6.30呼吸衰竭\6.30呼衰\1.R数据预处理+变量筛选9.21\results\dev_full_baseline.csv,True,338,3c20298e624b6136c8d70a55b06bcc7dde9bec12b1c2ac55dc08c6a16633f135
+external_validation_coef.csv,C:\Users\24339\Desktop\6.30呼吸衰竭\6.30呼衰\1.R数据预处理+变量筛选9.21\results\external_validation_coef.csv,True,191,5812366e3f94c2642b2bc5e51b5c642fd740594016e9f41361e7dbdd29fc01d3
+external_validation_coef_hco3.csv,C:\Users\24339\Desktop\6.30呼吸衰竭\6.30呼衰\1.R数据预处理+变量筛选9.21\results\external_validation_coef_hco3.csv,True,191,ac6669074627712d1b8f9b54b57fa765a7e29f9a3e4a4bf6fc6fa276af5d899b
+eicu_be_summary.csv,C:\Users\24339\Desktop\6.30呼吸衰竭\6.30呼衰\1.R数据预处理+变量筛选9.21\results\eicu_be_summary.csv,True,517,5380242644a77dc9f3f24928b5821f0021bf28f2ea7502b25d8c40734de38627
+eicu_hco3_summary.csv,C:\Users\24339\Desktop\6.30呼吸衰竭\6.30呼衰\1.R数据预处理+变量筛选9.21\results\eicu_hco3_summary.csv,True,520,a2581317ac590a84af8480fb4797af2a4ba42d9a31a2a7b4a3a192fb8bda5b35

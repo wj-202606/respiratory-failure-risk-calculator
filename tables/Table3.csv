@@ -1,0 +1,11 @@
+Analysis,n,Events,AUC,Brier,Slope,Intercept
+Training subset,1420,154,0.767,0.088,—,—
+Internal validation,608,72,0.727 (SD 0.006),0.098 (SD 0.001),0.797 (0.781–0.819)†,-0.356 (-0.385–-0.316)†
+"External validation (MIMIC-IV, BE, original)",434,88,0.620 (0.555–0.681),0.166 (0.155–0.178),0.410 (0.170–0.658),-0.637 (-1.052–-0.220)
+"External validation (MIMIC-IV, BE, recal)",434,88,0.620 (0.555–0.681),0.158,0.999,−0.001
+"External validation (MIMIC-IV, HCO₃⁻, original)",684,109,0.642 (0.588–0.700),0.137 (0.129–0.145),0.485 (0.291–0.714),-0.809 (-1.139–-0.425)
+"External validation (MIMIC-IV, HCO₃⁻, recal)",684,109,0.642 (0.588–0.700),0.131,1.002,0.004
+"External validation (eICU-CRD, BE, original)",1458,363,0.670 (0.638–0.703),0.179 (0.167–0.190),0.599,−0.486
+"External validation (eICU-CRD, BE, recal)",1458,363,0.670 (0.638–0.703),0.174,1.000,0.000
+"External validation (eICU-CRD, HCO₃⁻, original)",2287,521,0.670 (0.643–0.696),0.171 (0.162–0.180),0.619,−0.591
+"External validation (eICU-CRD, HCO₃⁻, recal)",2287,521,0.670 (0.643–0.696),0.164,1.000,0.000

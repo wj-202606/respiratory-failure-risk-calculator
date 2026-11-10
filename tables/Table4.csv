@@ -1,0 +1,7 @@
+Model,Internal AUC,Internal Brier,External AUC,External Brier
+Logistic regression (Python),0.744,0.098,0.620,0.166
+Random forest,0.748,0.096,0.609,0.164
+XGBoost,0.742,0.096,0.603,0.164
+LightGBM,0.720,0.098,0.587,0.166
+Support vector machine,0.587,0.103,0.502,0.170
+Multilayer perceptron,0.445,0.162,0.439,0.198
